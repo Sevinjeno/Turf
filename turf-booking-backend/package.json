@@ -1,0 +1,25 @@
+{
+  "name": "turf-booking-backend",
+  "version": "1.0.0",
+  "description": "Turf Booking backend Implementation",
+  "type": "module",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/app.js",
+    "debug": "nodemon --inspect-brk src/app.js"   
+  },
+  "keywords": [],
+  "author": "Sevinjeno",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "dotenv": "^16.4.6",
+    "express": "^4.21.1",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
