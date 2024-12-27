@@ -1,5 +1,5 @@
 import { emailTransporter } from '../../configs/emailConfig.js';
-import { generateOTP } from '../utils/otpGenerator.js';
+import { generateOTP } from '../../utils/otpGenerators.js';
 
 const otpStore = new Map(); // Temporary store for OTPs (use Redis for production)
 
@@ -7,8 +7,15 @@ const otpStore = new Map(); // Temporary store for OTPs (use Redis for productio
  * Send OTP to the provided email address.
  */
 export const sendEmailOTP = async (email) => {
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        console.log("Invalid Email address")
+        throw new Error('Invalid email address');
+    }
+
     const otp = generateOTP();
     otpStore.set(email, { otp, expiresAt: Date.now() + 5 * 60 * 1000 }); // Valid for 5 minutes
+
+    console.log(`Generated OTP for ${email}: ${otp}`); // Remove in production
 
     const mailOptions = {
         from: process.env.EMAIL_USER,
@@ -21,16 +28,33 @@ export const sendEmailOTP = async (email) => {
         await emailTransporter.sendMail(mailOptions);
         return { message: 'OTP sent successfully', email };
     } catch (error) {
-        throw new Error('Error sending email: ' + error.message);
+        console.error('Error sending email:', error.message);
+        throw new Error(process.env.NODE_ENV === 'development'
+            ? `Error sending email: ${error.message}`
+            : 'Failed to send email. Please try again.');
     }
 };
+
+// Clear expired OTPs
+setInterval(() => {
+    const now = Date.now();
+    for (const [key, value] of otpStore.entries()) {
+        if (value.expiresAt < now) {
+            otpStore.delete(key);
+        }
+    }
+}, 60 * 1000);
+
 
 /**
  * Validate the provided OTP.
  */
 export const validateOTP = (email, otp) => {
+    console.log("Validate",email,otp)
     const record = otpStore.get(email);
+    console.log("record",record)
     if (!record) {
+        console.log('OTP not found. Please request a new OTP.')
         throw new Error('OTP not found. Please request a new OTP.');
     }
 

@@ -1,51 +1,112 @@
+import { validateOTP } from '../services/AuthServices/emailService.js';
 import { registerUser, fetchUserById , fetchUserByEmail } from '../services/userService.js';
+import { generateToken } from '../utils/jwtUtils.js';
 import { userValidationSchema } from '../validators/userValidator.js';
 
 /**
  * Controller to handle user registration.
  */
 export const createUserController = async (req, res) => {
-    console.log("Inside ")
-    const { name, email, otp } = req.body;
+    const { name, email, action } = req.body;
     console.log(req.body)
     try {
-
-        if (!otp) {
-            return res.status(400).json({ message: 'OTP is required' });
-        }
-
-        // Validate OTP
-        const isOTPValid = validateOTP(email, otp);
-        if (!isOTPValid) {
-            return res.status(400).json({ message: 'Invalid or expired OTP' });
-        }
+        
+        console.log("Inside ")
+        // if (!otp) {
+        //     return res.status(400).json({ message: 'OTP is required' });
+        // }
+       
+        // // Validate OTP
+        // try {
+        //     const isOTPValid = validateOTP(email, otp);
+        //     console.log("otp validation result:", isOTPValid);
+        // } catch (error) {
+        //     console.error("Error validating OTP:", error.message);
+        //     return res.status(400).json({ message: error.message });
+        // }
 
         // Validate request data
         const { error } = userValidationSchema.validate(req.body);
         if (error) {
+            console.error("Validation error:", error.details[0].message);
             return res.status(400).json({ message: error.details[0].message });
         }
-
+        
         // Check if user already exists
-        const User = await fetchUserByEmail(email);
+        let User = await fetchUserByEmail(email);
+        console.log("User fetched from DB:", User);
 
         if (!User) {
-            try{
+            try {
+                console.log("User not found, registering new user...");
                 User = await registerUser(name, email);
+                console.log("User registered:", User);
+                // Generate JWT token after user registration
+                const token = generateToken(User);
+                console.log("Generated JWT token:", token);
+        
+                // Send the JWT token to the client (stored in an HTTPOnly cookie for security)
+                res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production',sameSite: 'Strict'  });
+                console.log("Token sent in cookie");
+        
+                // Respond with success
+                res.status(201).json({ message: 'User created successfully', data: User ,status: 'login' });
+            } catch (error) {
+                console.error("Error registering user:", error.message);
+                return res.status(400).json({ message: error.message }); // Send a specific error message to the client
             }
-         catch (error) {
-            return res.status(400).json({ message: error.message });  // Send a specific error message to the client
-          }
+        } else {
+            console.log("User already exists:", User);
+
+            // Generate JWT token for the existing user
+            const token = generateToken(User);  
+            console.log("JWT token reused:", token);
+        
+            // Send the JWT token to the client (stored in an HTTPOnly cookie for security)
+            res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Strict' });
+            console.log("Token sent in cookie");
+        
+             if(action=="register"){
+                 
+                 // Respond with success message and user data (existing user)
+                 return res.status(200).json({ 
+                     message: 'User already exists', 
+                     data: User, 
+                     status: 'existing' // Indicate this is an existing user
+                 });
+
+             } else if (action=="login"){
+                   // Respond with success message and user data (existing user)
+                   return res.status(200).json({ 
+                    message: 'User logged in', 
+                    data: User, 
+                    status: 'login' // Indicate this is an existing user
+                });
+
+             }
+
         }
-         // Generate JWT token after OTP verification
-         const token = generateToken(User);
 
-         // Send the JWT token to the client (stored in an HTTPOnly cookie for security)
-         res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+        if(User && action=="login"){
+            console.log("User already exists:", User);
+            // Generate JWT token for the existing user
+            const token = generateToken(User);  
+            console.log("JWT token reused:", token);
+        
+            // Send the JWT token to the client (stored in an HTTPOnly cookie for security)
+            res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Strict' });
+            console.log("Token sent in cookie");
+        
+            // Respond with success message and user data (existing user)
+            return res.status(200).json({ 
+                message: 'User already exists', 
+                data: User, 
+                status: 'existing' // Indicate this is an existing user
+            });
+        }
 
-
-        res.status(201).json({ message: 'User created successfully', data: User });
     } catch (error) {
+        console.error("Error in createUserController:", error.message);
         res.status(500).json({ message: 'Failed to create user', error: error.message });
     }
 };

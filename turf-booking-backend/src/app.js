@@ -5,8 +5,18 @@ import adminRoutes from './routes/adminRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import turfRoutes from './routes/turfRoutes.js';
+import cors from 'cors'; 
 
 const app = express();
+
+// Enable CORS for your frontend's origin
+const corsOptions = {
+    origin: 'http://localhost:5173', // Replace with your frontend's origin
+    credentials: true, // Allow credentials (cookies, authorization headers)
+};
+app.use(cors(corsOptions));
+
+
 app.use(express.json());
 app.use(bodyParser.json());
 

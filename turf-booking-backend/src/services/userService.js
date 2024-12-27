@@ -20,7 +20,7 @@ export const fetchUserById = async (id) => {
     }
 };
 
-// Fetch user by ID
+// Fetch user by email
 export const fetchUserByEmail = async (email) => {
     try {
         const user = await userModel.getUserByEmail(email);
