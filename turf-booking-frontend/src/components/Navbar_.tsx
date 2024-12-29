@@ -9,6 +9,7 @@ function Navbar_({}: Props) {
             <div className="text-lg font-bold text-blue-600">7Jeno</div>
             <div className="flex items-center space-x-4">
             <input
+                id="location-search"
                 type="text"
                 placeholder="Enter location"
                 className="border border-gray-300 p-2 rounded-lg w-64"

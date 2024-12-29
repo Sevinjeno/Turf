@@ -25,3 +25,25 @@ export const getTurfsByLocationController = async (req, res) => {
         res.status(500).json({ message: 'Failed to fetch turfs', error: error.message });
     }
 };
+
+
+
+export const getNearbyTurfs = async (req, res) => {
+    const { lat, lon, radius } = req.query;
+
+    try {
+        const query = `
+            SELECT id, name, location, 
+            ST_Distance(location, ST_SetSRID(ST_Point($2, $1), 4326)) AS distance
+            FROM turfs
+            WHERE ST_DWithin(location, ST_SetSRID(ST_Point($2, $1), 4326), $3)
+            ORDER BY distance ASC;
+        `;
+
+        const { rows } = await pool.query(query, [lat, lon, radius]);
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error('Error fetching nearby turfs:', error);
+        res.status(500).json({ error: 'Failed to fetch turfs' });
+    }
+};
