@@ -116,6 +116,7 @@ export const createUserController = async (req, res) => {
  */
 export const getUserController = async (req, res) => {
     const { id } = req.params;
+    console.log("ID",id)
     try {
         const user = await fetchUserById(id);
         if (!user) {
