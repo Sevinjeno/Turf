@@ -1,5 +1,5 @@
 import { validateOTP } from '../services/AuthServices/emailService.js';
-import { registerUser, fetchUserById , fetchUserByEmail } from '../services/userService.js';
+import { registerUser, fetchUserById , fetchUserByEmail, fetchAllUsers } from '../services/userService.js';
 import { generateToken } from '../utils/jwtUtils.js';
 import { userValidationSchema } from '../validators/userValidator.js';
 
@@ -12,18 +12,7 @@ export const createUserController = async (req, res) => {
     try {
         
         console.log("Inside ")
-        // if (!otp) {
-        //     return res.status(400).json({ message: 'OTP is required' });
-        // }
        
-        // // Validate OTP
-        // try {
-        //     const isOTPValid = validateOTP(email, otp);
-        //     console.log("otp validation result:", isOTPValid);
-        // } catch (error) {
-        //     console.error("Error validating OTP:", error.message);
-        //     return res.status(400).json({ message: error.message });
-        // }
 
         // Validate request data
         const { error } = userValidationSchema.validate(req.body);
@@ -111,6 +100,62 @@ export const createUserController = async (req, res) => {
     }
 };
 
+
+
+
+export const registerUserController = async (req, res) => {
+    const { name, email } = req.body;
+   
+    try {
+        // Validate input data
+        const { error } = userValidationSchema.validate({ name, email });
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
+       console.log("req.body",req.body)
+        // Check if the user already exists
+        const existingUser = await fetchUserByEmail(email);
+        if (existingUser) {
+            return res.status(400).json({ message: 'User already exists. Please log in.' });
+        }
+
+        // Register a new user
+        const newUser = await registerUser(name, email);
+
+        // Generate JWT token
+        const token = generateToken(newUser);
+
+        // Send the token in an HTTPOnly cookie
+        res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Strict' });
+
+        return res.status(201).json({ message: 'User registered successfully', data: newUser, status: 'registered' });
+    } catch (error) {
+        return res.status(500).json({ message: 'Failed to register user', error: error.message });
+    }
+};
+
+
+export const loginUserController = async (req, res) => {
+    console.log("req.body",req.body)
+    const { email } = req.body;
+    try {
+        // Check if the user exists
+        const user = await fetchUserByEmail(email);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found. Please register.' });
+        }
+
+        // Generate JWT token
+        const token = generateToken(user);
+
+        // Send the token in an HTTPOnly cookie
+        res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Strict' });
+        return res.status(200).json({ message: 'User logged in successfully', data: user, status: 'logged-in' });
+    } catch (error) {
+        return res.status(500).json({ message: 'Failed to log in user', error: error.message });
+    }
+};
+
 /**
  * Controller to get a user by ID.
  */
@@ -125,6 +170,16 @@ export const getUserController = async (req, res) => {
         res.status(200).json({ data: user });
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch user', error: error.message });
+    }
+};
+
+
+export const getAllUsersController = async (req, res) => {
+    try {
+        const users = await fetchAllUsers();
+        res.status(200).json({ data: users });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch users', error: error.message });
     }
 };
 

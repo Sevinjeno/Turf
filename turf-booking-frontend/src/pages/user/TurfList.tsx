@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import TurfCard from '../components/Turfcard';
+import TurfCard from '../../components/user/Turfcard';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import axios from 'axios';
 import mapboxgl from 'mapbox-gl'; // Import mapbox-gl
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder'; 
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 interface Turf {
   id: number;
@@ -24,8 +26,35 @@ function TurfList() {
   });;
   const [city, setCity] = useState<string>('');
   const [query, setQuery] = useState<string>(''); // Type for query is a string
-
+  const { lat : Latitude, lon : Longitude } = useSelector((state: RootState) => state.city);
   const radius: number = 5000000; // Radius in meters (5 km)
+   
+  useEffect(() => {
+    if (Latitude && Longitude) {
+      const fetchTurfs = async () => {
+        try {
+          const response = await axios.get('http://localhost:3000/api/turfs/nearby', {
+            params: {
+              lat: Latitude,
+              lon: Longitude,
+              radius: radius,
+            },
+          });
+          setTurfs(response.data);
+        } catch (err) {
+          setError('Failed to fetch turfs');
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchTurfs();
+    }
+  }, [Latitude, Longitude]);
+
+
+
 
   // Fetch user's location
   useEffect(() => {
@@ -39,7 +68,6 @@ function TurfList() {
             
             // Fetch city name using openstreet
             try {
-              debugger
               const response = await axios.get('https://nominatim.openstreetmap.org/reverse', {
                 params: {
                   lat: latitude,

@@ -10,6 +10,7 @@ export const generateToken = (user) => {
         userId: user.id,
         email: user.email,
         name: user.name,
+        role: user.role,
     };
 
     return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRATION });

@@ -1,8 +1,8 @@
 import React from 'react'
-import DashboardContent from '../components/DashboardContent'
-import Navbar_ from '../components/Navbar_'
+import DashboardContent from '../../components/user/DashboardContent'
+import Navbar_ from '../../custom-components/Navbar_'
 import TurfList from './TurfList'
-import FilterBar from '../components/Filterbar'
+import FilterBar from '../../components/user/Filterbar'
 
 interface Props {
     

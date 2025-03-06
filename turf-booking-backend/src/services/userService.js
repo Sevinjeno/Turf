@@ -1,7 +1,8 @@
 import * as userModel from '../models/userModel.js';  // Assuming userModel functions interact with the database
 
 // Register user (add a new user to the database)
-export const registerUser = async (name, email) => {
+export const registerUser = async (name, email,photo="Pic") => {
+    console.log("Pic",photo)
     try {
         const user = await userModel.createUser(name, email);  // Create user model function
         return user;
@@ -29,4 +30,8 @@ export const fetchUserByEmail = async (email) => {
     } catch (error) {
         throw new Error('Error fetching email by ID: ' + error.message);
     }
+};
+
+export const fetchAllUsers = async () => {
+    return await userModel.getAllUsers();
 };
