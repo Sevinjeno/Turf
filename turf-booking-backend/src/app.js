@@ -3,9 +3,11 @@ import bodyParser from 'body-parser';
 import userRoutes from './routes/userRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
+import "./utils/Cron.js"
 import paymentRoutes from './routes/paymentRoutes.js';
 import turfRoutes from './routes/turfRoutes.js';
 import superAdminRoutes from "./routes/superAdminRoutes.js";
+import timeslotRoutes from "./routes/timeslotRoutes.js";
 import session from "express-session";
 import cors from 'cors'; 
 import passport from 'passport';
@@ -46,9 +48,12 @@ app.use('/api/admins', adminRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/turfs', turfRoutes);
+
+
 // Super Admin Routes
 app.use('/api/superadmin', superAdminRoutes);
 app.use("/auth", authRoutes);
+app.use('/api/slots',timeslotRoutes);
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
