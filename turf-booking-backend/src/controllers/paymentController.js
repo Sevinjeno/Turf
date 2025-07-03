@@ -25,3 +25,15 @@ export const getPaymentByBooking = async (req, res) => {
         return res.status(500).json({ message: 'Failed to fetch payment' });
     }
 };
+
+export const createOrder = async (req, res) => {
+    const { amount, receipt } = req.body;
+  
+    try {
+      const order = await paymentService.createRazorpayOrder(amount, receipt);
+      return res.status(201).json({ message: 'Order created successfully', data: order });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'Failed to create order' });
+    }
+  };
