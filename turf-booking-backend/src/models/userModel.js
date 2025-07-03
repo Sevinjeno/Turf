@@ -26,3 +26,10 @@ export const getUserByEmail = async (email) => {
     const result = await pool.query(query, [email]);
     return result.rows[0];  // If user exists, return the user data, otherwise null
 };
+
+// Get all users
+export const getAllUsers = async () => {
+    const query = 'SELECT * FROM users;';
+    const result = await pool.query(query);
+    return result.rows;  // Return all user data
+};

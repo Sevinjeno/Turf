@@ -1,5 +1,5 @@
 import pool from '../configs/dbConfig.js';
-import { createNewTurf, fetchTurfsByLocation } from '../services/turfService.js';
+import { createNewTurf, fetchTurfsByLocation , fetchTurfById } from '../services/turfService.js';
 
 /**
  * Controller to handle creating a turf.
@@ -63,5 +63,16 @@ export const getNearbyTurfs = async (req, res) => {
     } catch (error) {
         console.error('Error fetching nearby turfs:', error);
         res.status(500).json({ error: 'Failed to fetch turfs' });
+    }
+};
+
+
+export const getTurfByIdController = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const turf = await fetchTurfById(id);
+        res.json(turf);
+    } catch (error) {
+        res.status(404).json({ message: error.message });
     }
 };

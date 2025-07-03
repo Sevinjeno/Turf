@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import TurfCard from '../components/Turfcard';
+import TurfCard from '../../components/user/Turfcard';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import axios from 'axios';
 import mapboxgl from 'mapbox-gl'; // Import mapbox-gl
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder'; 
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
+import { useNavigate } from 'react-router-dom';
 
 interface Turf {
   id: number;
@@ -24,8 +27,36 @@ function TurfList() {
   });;
   const [city, setCity] = useState<string>('');
   const [query, setQuery] = useState<string>(''); // Type for query is a string
-
+  const { lat : Latitude, lon : Longitude } = useSelector((state: RootState) => state.city);
   const radius: number = 5000000; // Radius in meters (5 km)
+  const navigate = useNavigate();
+   
+  useEffect(() => {
+    if (Latitude && Longitude) {
+      const fetchTurfs = async () => {
+        try {
+          const response = await axios.get('http://localhost:3000/api/turfs/nearby', {
+            params: {
+              lat: Latitude,
+              lon: Longitude,
+              radius: radius,
+            },
+          });
+          setTurfs(response.data);
+        } catch (err) {
+          setError('Failed to fetch turfs');
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchTurfs();
+    }
+  }, [Latitude, Longitude]);
+
+
+
 
   // Fetch user's location
   useEffect(() => {
@@ -39,7 +70,6 @@ function TurfList() {
             
             // Fetch city name using openstreet
             try {
-              debugger
               const response = await axios.get('https://nominatim.openstreetmap.org/reverse', {
                 params: {
                   lat: latitude,
@@ -97,49 +127,6 @@ function TurfList() {
     }
   }, [userLocation]);
 
-  // useEffect(() => {
-  //   // Initialize Mapbox Geocoder
-  //   const geocoder = new MapboxGeocoder({
-  //     accessToken: mapboxgl.accessToken!,
-  //     placeholder: 'Select for cities, places...',
-  //     types: 'place',
-  //   });
-
-  //   const geocoderContainer = document.getElementById('location-search');
-  //   if (geocoderContainer && geocoderContainer instanceof HTMLInputElement) {
-  //     if (geocoderContainer.value) {
-  //       geocoder.addTo(geocoderContainer);
-  //     }
-  //   }
-
-  //   // Handle geocoder result event
-  //   geocoder.on('result', (e: any) => {
-  //     const [lon, lat] = e.result.center; // Extract coordinates
-  //     setUserLocation({ lat, lon });
-  //     setCity(e.result.text); // Set city name
-  //     setLoading(false); // Stop loading once the result is fetched
-  //   });
-
-  //     // Define the callback function for 'result' event
-  // const handleResult = (e: any) => {
-  //   const [lon, lat] = e.result.center; // Extract coordinates
-  //   setUserLocation({ lat, lon });
-  //   setCity(e.result.text); // Set city name
-  //   setLoading(false);
-  // };
-
-  // // Attach the event listener
-  // geocoder.on('result', handleResult);
-
-  // // Cleanup event listener on component unmount
-  // return () => {
-  //   // try {
-  //   //   geocoder.off('result', handleResult);
-  //   // } catch (error) {
-  //   //   console.error('Failed to remove geocoder event listener:', error);
-  //   // }
-  // };
-  // }, []);
 
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -155,6 +142,9 @@ function TurfList() {
     }
   }
 
+  function handleClickTurf(id:any){
+    navigate(`/turf/${id}`)
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -164,7 +154,7 @@ function TurfList() {
       <div className="flex flex-wrap justify-start gap-20">
         {turfs.length > 0 ? (
           turfs.map((turf, index) => (
-            <div key={turf.id} className="turf-item sm:w-1/2 lg:w-1/4">
+            <div key={turf.id} className="turf-item sm:w-1/2 lg:w-1/4" onClick={()=>handleClickTurf(turf.id)}>
               <TurfCard key={index} turf={turf} />
               <p>Distance: {turf.distance.toFixed(2)} meters</p>
             </div>
