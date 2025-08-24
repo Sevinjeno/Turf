@@ -2,7 +2,6 @@ import * as userModel from '../models/userModel.js';  // Assuming userModel func
 
 // Register user (add a new user to the database)
 export const registerUser = async (name, email,photo="Pic") => {
-    console.log("Pic",photo)
     try {
         const user = await userModel.createUser(name, email);  // Create user model function
         return user;
@@ -25,7 +24,6 @@ export const fetchUserById = async (id) => {
 export const fetchUserByEmail = async (email) => {
     try {
         const user = await userModel.getUserByEmail(email);
-        console.log("Email Service user:",user)  // Get user by email function in userModel
         return user;
     } catch (error) {
         throw new Error('Error fetching email by ID: ' + error.message);

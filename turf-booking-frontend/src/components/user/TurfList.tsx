@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import TurfCard from '../../components/user/Turfcard';
+import TurfCard from './Turfcard';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import axios from 'axios';
 import mapboxgl from 'mapbox-gl'; // Import mapbox-gl
@@ -28,7 +28,7 @@ function TurfList() {
   const [city, setCity] = useState<string>('');
   const [query, setQuery] = useState<string>(''); // Type for query is a string
   const { lat : Latitude, lon : Longitude } = useSelector((state: RootState) => state.city);
-  const radius: number = 5000000; // Radius in meters (5 km)
+  const radius: number = 5000000000000; // Radius in meters (5 km)
   const navigate = useNavigate();
    
   useEffect(() => {
@@ -54,9 +54,6 @@ function TurfList() {
       fetchTurfs();
     }
   }, [Latitude, Longitude]);
-
-
-
 
   // Fetch user's location
   useEffect(() => {
@@ -126,8 +123,7 @@ function TurfList() {
       fetchTurfs();
     }
   }, [userLocation]);
-
-
+  
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setQuery(event.target.value);
@@ -162,7 +158,7 @@ function TurfList() {
         ) : (
           <p>No turfs found within the specified radius.</p>
         )}
-</div>
+      </div>
     </div>
   );
 }

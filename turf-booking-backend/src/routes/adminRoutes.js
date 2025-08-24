@@ -1,5 +1,5 @@
 import express from 'express';
-import { createAdminController, getAdminController, getAllAdminsController } from '../controllers/adminController.js';
+import { createAdminController, getAdminByIdController, getAdminDataController, getAllAdminsController, loginAdminController, logoutAdminController } from '../controllers/adminController.js';
 import { authenticate } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -11,10 +11,14 @@ router.post('/', createAdminController);
 
 //Route for getting all admins
 router.get('/', getAllAdminsController);
+router.get('/me', authenticate, getAdminDataController);
+
+
+router.post('/login', loginAdminController);
+router.post('/logout', logoutAdminController);
 
 // Route for getting an admin by ID
-router.get('/:id', getAdminController);
-
+router.get('/:id', getAdminByIdController);
 
 // Admin-only routes
 // router.get('/dashboard', authorize(['admin']), adminDashboardController); // Admin dashboard

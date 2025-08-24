@@ -8,14 +8,12 @@ const otpStore = new Map(); // Temporary store for OTPs (use Redis for productio
  */
 export const sendEmailOTP = async (email) => {
     if (!email || !/\S+@\S+\.\S+/.test(email)) {
-        console.log("Invalid Email address")
         throw new Error('Invalid email address');
     }
 
     const otp = generateOTP();
     otpStore.set(email, { otp, expiresAt: Date.now() + 5 * 60 * 1000 }); // Valid for 5 minutes
 
-    console.log(`Generated OTP for ${email}: ${otp}`); // Remove in production
 
     const mailOptions = {
         from: process.env.EMAIL_USER,
@@ -50,11 +48,8 @@ setInterval(() => {
  * Validate the provided OTP.
  */
 export const validateOTP = (email, otp) => {
-    console.log("Validate",email,otp)
     const record = otpStore.get(email);
-    console.log("record",record)
     if (!record) {
-        console.log('OTP not found. Please request a new OTP.')
         throw new Error('OTP not found. Please request a new OTP.');
     }
 

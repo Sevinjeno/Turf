@@ -1,9 +1,11 @@
-import React, { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useCallback, useState } from 'react'
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
-  const [formData, setFormData] = useState({ name: '', email: '' });
+type Props = {}
+
+function LoginPage({}: Props) {
+    const [formData, setFormData] = useState({ name: '', email: '' });
   const [message, setMessage] = useState('');
   const [action, setAction] = useState('login');
   const navigate = useNavigate();
@@ -20,8 +22,9 @@ const Login = () => {
     try {
       const url = getApiUrl();
       const requestData = action === 'login' ? { email: formData.email } : formData;
-      const response = await axios.post("http://localhost:3000"+url, requestData);
-
+     const response = await axios.post("http://localhost:3000" + url, requestData, {
+  withCredentials: true, // ✅ very important
+});
       setMessage(response.data.message);
 
       if (response.data.token) {
@@ -37,9 +40,9 @@ const Login = () => {
   const handleGoogleLogin = () => {
     window.location.href = 'http://localhost:3000/auth/google';
   };
-
   return (
-    <div className="h-screen flex items-center justify-center ">
+    <div className=' h-[100vh] flex items-center justify-center p-10  bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 '>
+          <div className="h-screen flex items-center justify-center ">
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-2xl transition-all duration-300 hover:shadow-3xl">
         <div className="flex justify-between mb-6">
           <button
@@ -102,7 +105,10 @@ const Login = () => {
         {message && <p className="text-center mt-4 text-red-500">{message}</p>}
       </div>
     </div>
-  );
-};
+        {/* <div className="h-full w-full bg-gradient-to-r from-myBlue to-myPink absolute -z-10">
+        </div> */}
+   </div>
+  )
+}
 
-export default Login;
+export default LoginPage

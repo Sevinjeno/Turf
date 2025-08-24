@@ -1,27 +1,33 @@
-import { createNewBooking, fetchBookingsForUser } from '../services/bookingService.js';
+import { checkBookingConflict, createBookingService, getBookingsByTurfAndDate, } from '../services/bookingService.js';
 
 /**
  * Controller to create a booking.
  */
 export const createBookingController = async (req, res) => {
-    const { userId, turfId, startTime, endTime } = req.body;
-    try {
-        const booking = await createNewBooking(userId, turfId, startTime, endTime);
-        res.status(201).json({ message: 'Booking created successfully', data: booking });
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to create booking', error: error.message });
+  const { turf_id, court_id, start_time, end_time, user_id } = req.body;
+  try {
+    const hasConflict = await checkBookingConflict(turf_id, court_id, start_time, end_time);
+    if (hasConflict) {
+      return res.status(409).json({ error: "Slot already booked" });
     }
+    const newBooking = await createBookingService(user_id, turf_id, court_id, start_time, end_time);
+    res.status(201).json(newBooking);
+  } catch (err) {
+    console.error("Booking error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
 };
 
-/**
- * Controller to get bookings for a user.
- */
-export const getBookingsForUserController = async (req, res) => {
-    const { userId } = req.params;
-    try {
-        const bookings = await fetchBookingsForUser(userId);
-        res.status(200).json({ data: bookings });
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to fetch bookings', error: error.message });
+export const getBookingsController = async (req, res) => {
+   const { turfId, date } = req.query;
+  try {
+    const bookings = await getBookingsByTurfAndDate(turfId, date);
+    if (bookings.length === 0) {
+      return res.status(404).json({ message: "No bookings found for this turf on the specified date." });
     }
-};
+    res.status(200).json(bookings);
+  } catch (err) {
+    console.error("Error fetching bookings:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+}

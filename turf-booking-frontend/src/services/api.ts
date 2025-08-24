@@ -38,3 +38,5 @@ export const createSlot = async (slotData: Omit<Slot, "id">) => {
     return null;
   }
 };
+
+export const API="http://localhost:3000";
