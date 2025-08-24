@@ -7,12 +7,14 @@ import "./utils/Cron.js"
 import paymentRoutes from './routes/paymentRoutes.js';
 import turfRoutes from './routes/turfRoutes.js';
 import superAdminRoutes from "./routes/superAdminRoutes.js";
-import timeslotRoutes from "./routes/timeslotRoutes.js";
 import session from "express-session";
+import slotRoutes from "./routes/slotRoutes.js";
+import courtRoutes from "./routes/courtRoutes.js";
 import cors from 'cors'; 
 import passport from 'passport';
 import authRoutes from "./routes/authRoutes.js"
 import "./configs/passport.js"
+import cookieParser from 'cookie-parser';
 const app = express();
 
 // Enable CORS for your frontend's origin
@@ -31,6 +33,9 @@ app.options('*', (req, res) => {
     res.sendStatus(200);
 });
 
+app.use(cookieParser());
+
+
 // Express session (required for Passport)
 app.use(session({ secret: process.env.JWT_SECRET, resave: false, saveUninitialized: false }));
 app.use(express.json());
@@ -48,12 +53,15 @@ app.use('/api/admins', adminRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/turfs', turfRoutes);
-
+app.use("/api/courts", courtRoutes);
+//Image
+app.use("/uploads", express.static("uploads"));
 
 // Super Admin Routes
 app.use('/api/superadmin', superAdminRoutes);
 app.use("/auth", authRoutes);
-app.use('/api/slots',timeslotRoutes);
+app.use('/api/slots',slotRoutes);
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

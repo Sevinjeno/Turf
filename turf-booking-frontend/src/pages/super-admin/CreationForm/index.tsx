@@ -18,6 +18,11 @@ const UserCreationForm: React.FC<UserCreationFormProps> = ({ onSuccess }) => {
 
     try {
       const token = localStorage.getItem("token");
+      // while creating we are sending to respective api based on role 
+      if (!token) {
+        setMessage("You are not authorized to perform this action.");
+        return;
+      }
       const api=role==="Admin"?"/api/admins/" : "/api/users"
       const payload=role==="Admin"?{ email, password, name ,phone}:{name,email}
       const response = await axios.post(

@@ -1,17 +1,20 @@
 // src/components/Navbar.tsx
 import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../store';
-import { setQuery, setCities, setCityCoordinates } from '../features/citySlice';
+import { RootState } from '../../store';
+import { setQuery, setCities, setCityCoordinates } from '../../features/citySlice';
 import axios from 'axios';
+import { User } from '../../types/user';
 
 //! Infinite Scrolling / Lazy loading will be added later ...
 
 //  ?   Debouncing and Caching in Implemented
 
+type NavbarProps = {
+  user: User; // Define the type of user if known  
+};
 
-
-function Navbar_() {
+function Navbar_(props:NavbarProps) {
   const dispatch = useDispatch(); // Dispatch actions
   const query = useSelector((state: any) => state.city.query); // Access query from Redux state
   const cities = useSelector((state: any) => state.city.cities); // Access cities from Redux state

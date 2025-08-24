@@ -18,7 +18,6 @@ passport.use(
         const email = profile.emails?.[0]?.value;
         const name = profile.displayName;
         const photo = profile.photos?.[0]?.value;
-         console.log("Photo ",profile.photos?.[0]?.value)
 
          let user = await fetchUserByEmail(email); // Check if user exists
 

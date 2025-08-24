@@ -1,5 +1,5 @@
 import express from 'express';
-import { createUserController, getAllUsersController, getUserController, loginUserController, registerUserController } from '../controllers/userController.js';
+import { createUserController, getAllUsersController, getUserController, getUserSelfController, loginUserController, registerUserController } from '../controllers/userController.js';
 import { sendOTPController, verifyOTPController } from "../controllers/authController/emailController.js"
 import { authenticate } from '../middlewares/authMiddleware.js';
 const router = express.Router();
@@ -12,6 +12,7 @@ router.post('/', registerUserController);
 //route for login 
 router.post('/login', loginUserController);
 
+router.get('/me', authenticate, getUserSelfController);
 // Route for getting a user by ID
 // router.get('/:id', getUserController);
 router.get('/:id', authenticate, getUserController);

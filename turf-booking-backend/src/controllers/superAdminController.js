@@ -6,7 +6,7 @@ import { generateToken } from '../utils/jwtUtils.js';
 // Super Admin Registration
 export const registerSuperAdmin = async (req, res) => {
     const { username, password } = req.body;
-    console.log("USer",req.body)
+    ("USer",req.body)
 
     try {
         const existingAdmin = await superAdminModel.getSuperAdminByUsername(username);
