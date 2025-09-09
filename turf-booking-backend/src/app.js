@@ -48,6 +48,7 @@ app.use(passport.session());
 
 
 // Use routes
+app.use("/auth", authRoutes);
 app.use('/api/users', userRoutes); 
 app.use('/api/admins', adminRoutes);
 app.use('/api/bookings', bookingRoutes);
@@ -59,7 +60,6 @@ app.use("/uploads", express.static("uploads"));
 
 // Super Admin Routes
 app.use('/api/superadmin', superAdminRoutes);
-app.use("/auth", authRoutes);
 app.use('/api/slots',slotRoutes);
 
 // Start server

@@ -1,6 +1,5 @@
 import express from 'express';
 import { createUserController, getAllUsersController, getUserController, getUserSelfController, loginUserController, registerUserController } from '../controllers/userController.js';
-import { sendOTPController, verifyOTPController } from "../controllers/authController/emailController.js"
 import { authenticate } from '../middlewares/authMiddleware.js';
 const router = express.Router();
 
@@ -19,7 +18,7 @@ router.get('/:id', authenticate, getUserController);
 
 router.get('/', getAllUsersController);
 //email
-router.post('/send-otp', sendOTPController);  // Route to send OTP
-router.post('/verify-otp', verifyOTPController); // Route to verify OTP
+// router.post('/send-otp', sendOTPController);  // Route to send OTP
+// router.post('/verify-otp', verifyOTPController); // Route to verify OTP
 
 export default router;

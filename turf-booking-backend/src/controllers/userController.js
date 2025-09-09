@@ -1,4 +1,3 @@
-import { validateOTP } from "../services/AuthServices/emailService.js";
 import {
   registerUser,
   fetchUserById,
