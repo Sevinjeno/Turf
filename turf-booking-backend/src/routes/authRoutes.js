@@ -1,31 +1,25 @@
 import express from "express";
-import passport from "passport";
-import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { sendEmailOtpController, verifyEmailOtpController } from "../controllers/authController/emailController.js";
+import { sendPhoneOTPController, verifyPhoneOTPController } from "../controllers/authController/phoneController.js";
+import { googleLogin } from "../controllers/authController/googleController.js";
 
 dotenv.config();
 
 const router = express.Router();
 
-// Step 1: Redirect user to Google OAuth
-router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+// Routes for email-based authentication
+router.post('/email/send-otp', sendEmailOtpController);
+router.post('/email/verify-otp', verifyEmailOtpController);
 
-// Step 2: Google OAuth Callback URL
-router.get(
-    "/google/callback",
-    passport.authenticate("google", { failureRedirect: "/" }),
-    (req, res) => {
-        // Extract user and token from passport response
-        const { user, token } = req.user;
+// Routes for phone-based authentication
+router.post('/phone/send-otp', sendPhoneOTPController);
+router.post('/phone/verify-otp', verifyPhoneOTPController);
 
-        // Set JWT token as HTTPOnly cookie
-        res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "Strict" });
+// Route for Google-based authentication
+router.post('/google/login', googleLogin);
 
-        res.redirect("http://localhost:5173/"); // Redirect to frontend
-    }
-);
 
-// Step 3: Logout
 router.get("/logout", (req, res) => {
     res.clearCookie("token");
     res.json({ message: "Logged out successfully" });

@@ -1,9 +1,9 @@
-import * as userModel from '../models/userModel.js';  // Assuming userModel functions interact with the database
+import * as userModel from '../models/userModel.js';
 
-// Register user (add a new user to the database)
-export const registerUser = async (name, email,photo="Pic") => {
+// Register user (by name, email, phone, or Google ID)
+export const registerUser = async (userData) => {
     try {
-        const user = await userModel.createUser(name, email);  // Create user model function
+        const user = await userModel.createUser(userData);
         return user;
     } catch (error) {
         throw new Error('Error creating user: ' + error.message);
@@ -13,7 +13,7 @@ export const registerUser = async (name, email,photo="Pic") => {
 // Fetch user by ID
 export const fetchUserById = async (id) => {
     try {
-        const user = await userModel.getUserById(id);  // Get user by ID function in userModel
+        const user = await userModel.getUserById(id);
         return user;
     } catch (error) {
         throw new Error('Error fetching user by ID: ' + error.message);
@@ -26,10 +26,36 @@ export const fetchUserByEmail = async (email) => {
         const user = await userModel.getUserByEmail(email);
         return user;
     } catch (error) {
-        throw new Error('Error fetching email by ID: ' + error.message);
+        throw new Error('Error fetching user by email: ' + error.message);
     }
 };
 
+// Fetch user by phone
+export const fetchUserByPhone = async (phone) => {
+    try {
+        const user = await userModel.getUserByPhone(phone);
+        return user;
+    } catch (error) {
+        throw new Error('Error fetching user by phone: ' + error.message);
+    }
+};
+
+// Fetch user by Google ID
+export const fetchUserByGoogleId = async (googleId) => {
+    try {
+        const user = await userModel.getUserByGoogleId(googleId);
+        return user;
+    } catch (error) {
+        throw new Error('Error fetching user by Google ID: ' + error.message);
+    }
+};
+
+// Fetch all users
 export const fetchAllUsers = async () => {
-    return await userModel.getAllUsers();
+    try {
+        const users = await userModel.getAllUsers();
+        return users;
+    } catch (error) {
+        throw new Error('Error fetching all users: ' + error.message);
+    }
 };
