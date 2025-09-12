@@ -15,6 +15,7 @@ import passport from 'passport';
 import authRoutes from "./routes/authRoutes.js"
 import "./configs/passport.js"
 import cookieParser from 'cookie-parser';
+import { errorHandler } from './middlewares/errorHandler.js';
 const app = express();
 
 // Enable CORS for your frontend's origin
@@ -61,6 +62,10 @@ app.use("/uploads", express.static("uploads"));
 // Super Admin Routes
 app.use('/api/superadmin', superAdminRoutes);
 app.use('/api/slots',slotRoutes);
+
+
+//error handling 
+app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 3000;

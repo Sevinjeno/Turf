@@ -1,7 +1,4 @@
 import React, { useState } from "react";
-import Input from "../../custom-components/Input";
-import axios from "axios";
-import { API } from "../../api/index"; // Adjust the import path as necessary
 import { useNavigate } from "react-router-dom";
 import { LoginAdmin } from "../../features/admin/middleware";
 import { useAppDispatch } from "../../store";
@@ -78,13 +75,13 @@ function AdminDashboard({}: Props) {
         ) : (
           // 🟢 Actual Form
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-            <Input
+            <input
               name="email"
               type="email"
               value={formData.email}
               onChange={handleChange}
             />
-            <Input
+            <input
               name="password"
               type="password"
               value={formData.password}

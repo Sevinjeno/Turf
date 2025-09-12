@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import './Main.css'
+import Login from './pages/user/Login';
 import LoginPage from './pages/user/LoginPage';
 import UserDashboard from './pages/user/UserDashboard';
 import SuperAdminLogin from './pages/super-admin/SuperAdminLogin';
@@ -15,7 +16,8 @@ function App(){
   return (
     <>
     <Routes>
-      <Route path="/" element={<LoginPage />} />
+      <Route path="/" element={<Login />} />
+      {/* <Route path="/" element={<LoginPage />} /> */}
       <Route path="/user" element={<UserDashboard />} />
       <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
       <Route path="/admin" element={<AdminLoginPage />} />
