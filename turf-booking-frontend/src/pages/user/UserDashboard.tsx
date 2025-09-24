@@ -6,6 +6,7 @@ import FilterBar from '../../components/user/Filterbar'
 import { RootState, useAppDispatch } from "../../store";
 import { fetchUser } from '../../features/user/middleware';
 import { useSelector } from 'react-redux'
+import ProfileMenu from '../../components/user/Profile'
 
 
 const UserDashboard = () => {
@@ -21,7 +22,10 @@ const UserDashboard = () => {
     return (
         <div className="min-h-screen flex flex-col bg-gray-100">
                 {/* Navbar */}
-                <Navbar_ user={user} />
+                 <div className="flex items-center justify-between bg-white shadow-md px-4 py-2">
+                    <Navbar_ user={user} />
+                    <ProfileMenu user={user} />
+                  </div>
                 {/* Main Content Area */}
                 <div className="flex flex-1 flex-col">
                 {/* Left Sidebar - Dashboard Content */}
