@@ -1,6 +1,7 @@
 import { storeOtp, getOtp, deleteOtp } from "../../utils/RedisClient.js";
 import { fetchUserByPhone, registerUser } from "../userService.js";
 import { generateToken } from "../../utils/jwtUtils.js";
+import { generateOtp } from "../../utils/OtpUtils.js";
 
 const OTP_EXPIRE_TIME = 300; // 5 minutes
 

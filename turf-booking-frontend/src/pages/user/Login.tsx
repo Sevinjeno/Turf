@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AuthForm from "../../components/Auth/AuthForm";
 import { loginUser, registerUser } from "../../services/Users/index";
 import OtpInput from "../../components/user/OtpInput";
+import { sendOtp, verifyOtp } from '../../services/Users/authServices';
 
 const images = [
   "/images/1.jpg",
@@ -19,6 +20,8 @@ const LoginPage = () => {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [showOtpComp, setShowOtpComp] = useState(false);
   const [otp, setOtp] = useState("");
+  const [method, setMethod] = useState<"email" | "phone">("email");
+  const [value, setValue] = useState(""); // store email or phone
   const [resendTimer, setResendTimer] = useState(30);
   useEffect(() => {
     const interval = setInterval(() => {
@@ -28,40 +31,29 @@ const LoginPage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleAuthSubmit = async (method: "email" | "phone", data: any) => {
+const handleAuthSubmit = async (submitMethod: "email" | "phone", data: string) => {
+  setMethod(submitMethod);
+  setValue(data); // save email or phone for OTP verification
+  
+  try {
+    await sendOtp(submitMethod, data); // call backend API
     setShowOtpComp(true);
-    // try {
-    //   let response;
-    //   if (method === "email") {
-    //     response = await loginUser(data.email);
-    //   } else {
-    //     // handle phone logic if needed
-    //   }
+    setResendTimer(30); // start resend countdown
+  } catch (err) {
+    setShowOtpComp(false);
+    console.error("Error sending OTP:", err);
+  }
+};
 
-    //   if (response.token) {
-    //     localStorage.setItem("token", response.token);
-    //     const role = response.data?.role;
-    //     navigate(role === "admin" ? "/admin/dashboard" : "/user");
-    //   }
-    // } catch (error: any) {
-    //   console.error(
-    //     "Authentication error:",
-    //     error.response?.data?.message || error.message
-    //   );
-    // }
-  };
-
-  const handleOtpSubmit = async () => {
-    // Verify OTP logic here
-    console.log("Verifying OTP:", otp);
-      if(otp=="111111"){
-        console.log("yes")
-        navigate("/user")
-      }
-    setIsOtpSent(true);
-    // Example: If OTP is correct, navigate to dashboard
-  };
-
+const handleOtpSubmit = async () => {
+  try {
+    const res = await verifyOtp(method, value, otp); // call backend verify OTP
+    console.log("Verified OTP:", res);
+    navigate("/user"); // redirect after success
+  } catch (err) {
+    console.error("Invalid OTP:", err);
+  }
+};
   const handleResendOtp = () => {
     setResendTimer(30);
     // Re-send OTP API call logic here

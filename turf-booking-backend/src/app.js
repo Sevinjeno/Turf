@@ -49,7 +49,7 @@ app.use(passport.session());
 
 
 // Use routes
-app.use("/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 app.use('/api/users', userRoutes); 
 app.use('/api/admins', adminRoutes);
 app.use('/api/bookings', bookingRoutes);
