@@ -4,6 +4,8 @@ import { sendEmailOtpController, verifyEmailOtpController } from "../controllers
 import { sendPhoneOTPController, verifyPhoneOTPController } from "../controllers/authController/phoneController.js";
 import { googleLogin } from "../controllers/authController/googleController.js";
 import { checkValidation, validateEmail, validateOtp, validatePhone } from "../middlewares/Validation.js";
+import { refreshTokenController } from "../controllers/authController/refreshController.js";
+import { logoutController } from "../controllers/authController/logoutController.js";
 
 dotenv.config();
 
@@ -20,10 +22,8 @@ router.post('/phone/verify-otp', [...validatePhone, ...validateOtp], checkValida
 // Route for Google-based authentication
 router.post('/google/login', googleLogin);
 
+router.post('/refresh', refreshTokenController);
 
-router.get("/logout", (req, res) => {
-    res.clearCookie("token");
-    res.json({ message: "Logged out successfully" });
-});
+router.get("/logout", logoutController);
 
 export default router;

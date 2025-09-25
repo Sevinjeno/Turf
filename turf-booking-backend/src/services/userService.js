@@ -59,3 +59,5 @@ export const fetchAllUsers = async () => {
         throw new Error('Error fetching all users: ' + error.message);
     }
 };
+
+

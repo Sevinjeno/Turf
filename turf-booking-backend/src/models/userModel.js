@@ -1,13 +1,13 @@
 import pool from '../configs/dbConfig.js';
 
 // Create a new user
-export const createUser = async (name, email) => {
+export const createUser = async (name=null, email=null ,phone=null) => {
     const query = `
-        INSERT INTO users (name, email)
-        VALUES ($1, $2)
+        INSERT INTO users (name, email,phone)
+        VALUES ($1, $2, $3)
         RETURNING *;
     `;
-    const values = [name, email];
+   const values = [name, email, phone];
     const result = await pool.query(query, values);
     return result.rows[0];
 };
@@ -56,4 +56,22 @@ export const createUserWithGoogle = async (name, email, googleId) => {
     `;
     const result = await pool.query(query, [name, email, googleId]);
     return result.rows[0];
+};
+
+//refresh token 
+export const saveRefreshToken = async (userId, token) => {
+  const query = `UPDATE users SET refresh_token = $1 WHERE id = $2 RETURNING *`;
+  const result = await pool.query(query, [token, userId]);
+  return result.rows[0];
+};
+
+export const getUserByRefreshToken = async (token) => {
+  const query = `SELECT * FROM users WHERE refresh_token = $1`;
+  const result = await pool.query(query, [token]);
+  return result.rows[0];
+};
+
+export const deleteRefreshToken = async (userId) => {
+  const query = `UPDATE users SET refresh_token = NULL WHERE id = $1`;
+  await pool.query(query, [userId]);
 };
