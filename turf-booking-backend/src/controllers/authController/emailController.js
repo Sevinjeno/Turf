@@ -42,7 +42,12 @@ console.log("Request Body:", req.body);
 
     let user= await fetchUserByEmail(email)
     if(!user){
-      user=await registerUser(email)
+      user = await registerUser({
+    name: null,
+    email: email,    // pass it properly
+    phone: null,
+    google_id: null
+  });
     }
 
 

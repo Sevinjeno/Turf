@@ -1,5 +1,5 @@
-import { getUserByRefreshToken, saveRefreshToken } from "../../models/userModel";
-import { generateRefreshToken, generateToken, verifyRefreshToken } from "../../utils/jwtUtils";
+import { getUserByRefreshToken, saveRefreshToken } from "../../models/userModel.js";
+import { generateRefreshToken, generateToken, verifyRefreshToken } from "../../utils/jwtUtils.js";
 
 export const refreshTokenController = async (req, res) => {
   try {

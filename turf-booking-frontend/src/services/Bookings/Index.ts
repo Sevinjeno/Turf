@@ -1,6 +1,6 @@
 
 import axios from "axios";
-import { API } from "../api";
+import  API  from "../api";
 
 interface BookingPayload {
   turf_id: string | undefined ;

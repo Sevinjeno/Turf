@@ -7,8 +7,6 @@ import dayjs from "dayjs";
 import { fetchTurfSlots } from "../../services/Slots/index";
 import { createBooking, getBookedSlots } from "../../services/Bookings/Index";
 import { RootState, useAppDispatch } from "../../store";
-import { useSelector } from "react-redux";
-import { fetchUser } from "../../features/user/middleware";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { getCourtsbyTurfId } from "../../services/Courts/index";
@@ -47,14 +45,11 @@ function DetailTurfPage() {
   const [slots, setSlots] = useState([]);
   const [minBookingDuration, setMinBookingDuration] = useState(60);
   const dispatch = useAppDispatch();
-  const userData = useSelector((state: RootState) => state.user);
   const [courts, setCourts] = useState<any[]>([]);
   const [selectedCourt, setSelectedCourt] = useState<string>("");
-  let user = userData.user?.data;
+  let user = {name:"",id:"",email:""};
 
-  useEffect(() => {
-    dispatch(fetchUser());
-  }, []);
+
 
   // Fetch courts for the turf
 

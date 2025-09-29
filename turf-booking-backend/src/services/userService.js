@@ -3,6 +3,7 @@ import * as userModel from '../models/userModel.js';
 // Register user (by name, email, phone, or Google ID)
 export const registerUser = async (userData) => {
     try {
+        console.log(userData,"userData")
         const user = await userModel.createUser(userData);
         return user;
     } catch (error) {

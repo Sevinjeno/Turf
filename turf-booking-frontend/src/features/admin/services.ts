@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API } from '../../services/api';
+import API from '../../services/api';
 export const loginAdminApi = async (credentials:any) => {
   let URl=`${API}/api/admins/login`
   console.log("URl",URl)

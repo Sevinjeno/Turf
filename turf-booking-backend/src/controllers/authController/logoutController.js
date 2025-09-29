@@ -1,4 +1,4 @@
-import { deleteRefreshToken, getUserByRefreshToken } from "../../models/userModel";
+import { deleteRefreshToken, getUserByRefreshToken } from "../../models/userModel.js";
 
 export const logoutController = async (req, res) => {
   try {
