@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { User } from "lucide-react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store";
 
 interface User {
   name?: string;
@@ -8,13 +10,17 @@ interface User {
 }
 
 interface ProfileMenuProps {
-  user?: User; // user can be undefined initially
+  user?: User|string; // user can be undefined initially
 }
 
-const ProfileMenu: React.FC<ProfileMenuProps> = ({ user }) => {
+const ProfileMenu: React.FC<ProfileMenuProps> = () => {
+   const user=useSelector((state:RootState)=>state.auth.user)
+   console.log("user",user)
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState(user?.name || "");
-  const [email, setEmail] = useState(user?.email || "");
+  const [id, setId] = useState(user?.id);
+  const [name, setName] = useState(user?.name);
+  const [phone, setPhone] = useState(user?.phone);
+  const [email, setEmail] = useState(user?.email);
   const [showEdit, setShowEdit] = useState(false);
 
   const handleSave = () => {
@@ -29,9 +35,9 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ user }) => {
         onClick={() => setOpen(!open)}
         className="flex items-center space-x-2 p-2 bg-gray-100 rounded-full hover:bg-gray-200"
       >
-       {user?.avatar ? (
+       {user? (
   <img
-    src={user.avatar}
+    src={""}
     alt="profile"
     className="w-8 h-8 rounded-full"
   />
@@ -40,7 +46,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ user }) => {
     <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
   </div>
 )}
-        <span className="font-medium">{user?.name || "User"}</span>
+        <span className="font-medium">{"User"}</span>
       </button>
 
       {/* Dropdown */}

@@ -1,6 +1,6 @@
 import { storeOtp, getOtp, deleteOtp } from "../../utils/RedisClient.js";
 import { fetchUserByPhone, registerUser } from "../userService.js";
-import { generateToken } from "../../utils/jwtUtils.js";
+import { generateAccessToken } from "../../utils/jwtUtils.js";
 import { generateOtp } from "../../utils/OtpUtils.js";
 
 const OTP_EXPIRE_TIME = 300; // 5 minutes
@@ -25,6 +25,6 @@ export const verifyPhoneOtp = async (phone, otp) => {
   if (!user) {
     user = await registerUser({ phone });
   }
-  const token = generateToken(user);
+  const token = generateAccessToken(user);
   return { token, user };
 };

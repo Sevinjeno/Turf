@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API } from "../api";
+import  API  from "../api";
 
 export const getCourtsbyTurfId = async (turfId: string) => {
   try {

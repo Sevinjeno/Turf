@@ -11,7 +11,7 @@ import { User } from '../../types/user';
 //  ?   Debouncing and Caching in Implemented
 
 type NavbarProps = {
-  user: User; // Define the type of user if known  
+  user?: User|string; // Define the type of user if known  
 };
 
 function Navbar_(props:NavbarProps) {

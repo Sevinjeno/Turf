@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthForm from "../../components/Auth/AuthForm";
-import { loginUser, registerUser } from "../../services/Users/index";
 import OtpInput from "../../components/user/OtpInput";
 import { sendOtp, verifyOtp } from '../../services/Users/authServices';
+import { setAccessToken, setUser } from "../../features/auth/authSlice";
+import { useAppDispatch } from "../../store";
 
 const images = [
   "/images/1.jpg",
@@ -14,9 +15,10 @@ const images = [
 
 const LoginPage = () => {
   const navigate = useNavigate();
-
+  const dispatch=useAppDispatch()
+  const [loading,setLoading]=useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
+ 
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [showOtpComp, setShowOtpComp] = useState(false);
   const [otp, setOtp] = useState("");
@@ -34,7 +36,7 @@ const LoginPage = () => {
 const handleAuthSubmit = async (submitMethod: "email" | "phone", data: string) => {
   setMethod(submitMethod);
   setValue(data); // save email or phone for OTP verification
-  
+  setLoading(true)
   try {
     await sendOtp(submitMethod, data); // call backend API
     setShowOtpComp(true);
@@ -42,13 +44,18 @@ const handleAuthSubmit = async (submitMethod: "email" | "phone", data: string) =
   } catch (err) {
     setShowOtpComp(false);
     console.error("Error sending OTP:", err);
+  }finally{
+    setLoading(false)
   }
 };
 
 const handleOtpSubmit = async () => {
   try {
     const res = await verifyOtp(method, value, otp); // call backend verify OTP
-    console.log("Verified OTP:", res);
+    console.log(res?.user,res?.accessToken)
+   dispatch(setUser(res?.user))
+   dispatch(setAccessToken(res?.accessToken))
+
     navigate("/user"); // redirect after success
   } catch (err) {
     console.error("Invalid OTP:", err);
@@ -129,7 +136,7 @@ const handleOtpSubmit = async () => {
         {/* ✅ Text center-aligned for mobile clarity */}
 
         {!showOtpComp ? (
-          <AuthForm onSubmit={handleAuthSubmit} />
+          <AuthForm onSubmit={handleAuthSubmit} loading={loading} />
         ) : (
           <OtpInput
             otp={otp}

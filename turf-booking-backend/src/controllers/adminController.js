@@ -5,7 +5,7 @@ import {
   fetchAdminData,
 } from "../services/adminService.js";
 import { adminValidationSchema } from "../validators/adminValidator.js";
-import { generateToken } from "../utils/jwtUtils.js";
+import { generateAccessToken } from "../utils/jwtUtils.js";
 import bcrypt from "bcrypt";
 
 /**
@@ -87,7 +87,7 @@ export const loginAdminController = async (req, res) => {
     res.clearCookie("user_token", cookieOptions);
 
     // Generate JWT token
-    const token = generateToken(admin);
+    const token = generateAccessToken(admin);
     const cookieName = "admin_token";
     // Send the token in an HTTPOnly cookie
     res.cookie(cookieName, token, {

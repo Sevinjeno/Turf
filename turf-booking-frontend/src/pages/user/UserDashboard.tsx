@@ -3,27 +3,19 @@ import DashboardContent from '../../components/user/DashboardContent'
 import Navbar_ from '../../components/user/Navbar_'
 import TurfList from '../../components/user/TurfList'
 import FilterBar from '../../components/user/Filterbar'
-import { RootState, useAppDispatch } from "../../store";
-import { fetchUser } from '../../features/user/middleware';
-import { useSelector } from 'react-redux'
 import ProfileMenu from '../../components/user/Profile'
 
-
 const UserDashboard = () => {
-      const dispatch = useAppDispatch();
-       const userData = useSelector((state: RootState) => state.user);
-       let user=userData.user?.data
+  
+       let user={id:"",name:"",email:""}
        console.log("userData", user);
-     useEffect(() => {
-        dispatch(fetchUser());
-      }, []);
-
+ 
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-100">
                 {/* Navbar */}
                  <div className="flex items-center justify-between bg-white shadow-md px-4 py-2">
-                    <Navbar_ user={user} />
+                    <Navbar_  />
                     <ProfileMenu user={user} />
                   </div>
                 {/* Main Content Area */}

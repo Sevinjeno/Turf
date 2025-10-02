@@ -5,11 +5,12 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 interface AuthFormProps {
   onSubmit: (method: "email" | "phone", data: any) => void;
+  loading: boolean;
 }
 
 type AuthMode = "phone" | "email" | "google";
 
-const AuthForm: React.FC<AuthFormProps> = ({ onSubmit }) => {
+const AuthForm: React.FC<AuthFormProps> = ({ onSubmit, loading }) => {
   const [authMode, setAuthMode] = useState<AuthMode>("phone");
   const [formData, setFormData] = useState({ email: "", phone: "" });
   const [error, setError] = useState("");
@@ -30,7 +31,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSubmit }) => {
       if (!phoneNumber.isValid()) return false;
 
       const nationalNumber = phoneNumber.nationalNumber;
-      if (phoneNumber.country === "IN" && nationalNumber.length !== 10) return false;
+      if (phoneNumber.country === "IN" && nationalNumber.length !== 10)
+        return false;
 
       return true;
     } catch {
@@ -67,14 +69,13 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSubmit }) => {
     }
   };
 
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submit")
+    console.log("Submit");
     if (!isValid) return; // Don't submit if invalid
     if (authMode === "phone" || authMode === "email") {
-    onSubmit(authMode, formData[authMode]);
-  }
+      onSubmit(authMode, formData[authMode]);
+    }
   };
 
   return (
@@ -86,18 +87,30 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSubmit }) => {
       {/* Mode Selection Buttons */}
       <div className="flex justify-center gap-2 mb-4">
         <Button
-          onClick={() => {setAuthMode("phone"); setFormData({ email: "", phone: "" }); setError("")}}
+          onClick={() => {
+            setAuthMode("phone");
+            setFormData({ email: "", phone: "" });
+            setError("");
+          }}
           className={`${
-            authMode === "phone" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"
+            authMode === "phone"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 text-gray-700"
           } flex items-center justify-center border px-2 py-1 text-xs sm:px-3 sm:py-2 sm:text-sm`}
         >
           <Smartphone className="w-4 h-4 sm:w-5 sm:h-5 mr-1" /> Phone
         </Button>
 
         <Button
-          onClick={() => {setAuthMode("email"); setFormData({ email: "", phone: "" });setError("")}}
+          onClick={() => {
+            setAuthMode("email");
+            setFormData({ email: "", phone: "" });
+            setError("");
+          }}
           className={`${
-            authMode === "email" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"
+            authMode === "email"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 text-gray-700"
           } flex items-center justify-center border px-2 py-1 text-xs sm:px-3 sm:py-2 sm:text-sm`}
         >
           <Mail className="w-4 h-4 sm:w-5 sm:h-5 mr-1" /> Email
@@ -106,10 +119,17 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSubmit }) => {
         <Button
           onClick={() => setAuthMode("google")}
           className={`${
-            authMode === "google" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"
+            authMode === "google"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 text-gray-700"
           } flex items-center justify-center border px-2 py-1 text-xs sm:px-3 sm:py-2 sm:text-sm`}
         >
-          <img src="/images/google3.svg" alt="Google" className="w-4 h-4 sm:w-5 sm:h-5 mr-1" /> Google
+          <img
+            src="/images/google3.svg"
+            alt="Google"
+            className="w-4 h-4 sm:w-5 sm:h-5 mr-1"
+          />{" "}
+          Google
         </Button>
       </div>
 
@@ -137,12 +157,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSubmit }) => {
 
           <button
             type="submit"
-            disabled={!isValid}
+            disabled={!isValid || loading}
             className={`w-full py-2 text-white rounded transition-all duration-300 text-xs sm:text-sm ${
-              isValid ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-300 cursor-not-allowed"
+              !isValid || loading
+                ? "bg-gray-300 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
             }`}
           >
-            Send OTP
+            {loading ? "Sending..." : "Send OTP"}
           </button>
         </form>
       )}
