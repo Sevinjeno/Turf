@@ -1,5 +1,5 @@
 import { verifyGoogleToken, findOrCreateUser } from '../../services/AuthServices/googleService.js';
-import { generateToken } from '../../utils/jwtUtils.js';
+import { generateAccessToken } from '../../utils/jwtUtils.js';
 
 export const googleLogin = async (req, res) => {
     const { tokenId } = req.body;
@@ -16,7 +16,7 @@ export const googleLogin = async (req, res) => {
         const user = await findOrCreateUser(googleUser);
 
         // Generate JWT token for our app
-        const token = generateToken(user);
+        const token = generateAccessToken(user);
 
         // Send token as HTTP-only cookie
         res.cookie('user_token', token, {

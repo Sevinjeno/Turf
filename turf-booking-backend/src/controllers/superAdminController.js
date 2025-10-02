@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import * as superAdminModel from '../models/superAdminModel.js';
-import { generateToken } from '../utils/jwtUtils.js';
+import { generateAccessToken } from '../utils/jwtUtils.js';
 
 // Super Admin Registration
 export const registerSuperAdmin = async (req, res) => {
@@ -40,7 +40,7 @@ export const loginSuperAdmin = async (req, res) => {
         }
 
            // Generate JWT token
-           const token = generateToken({
+           const token = generateAccessToken({
             id: superAdmin.id,
             username: superAdmin.username,
             role: 'superadmin', // Include the role explicitly

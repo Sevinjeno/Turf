@@ -4,7 +4,7 @@ import {
   fetchUserByEmail,
   fetchAllUsers,
 } from "../services/userService.js";
-import { generateToken } from "../utils/jwtUtils.js";
+import { generateAccessToken } from "../utils/jwtUtils.js";
 import { userValidationSchema } from "../validators/userValidator.js";
 
 /**
@@ -31,7 +31,7 @@ export const createUserController = async (req, res) => {
         res.clearCookie("user_token", { path: "/" });
 
         // Generate JWT token after user registration
-        const token = generateToken(User);
+        const token = generateAccessToken(User);
 
         // Send the JWT token to the client (stored in an HTTPOnly cookie for security)
         res.cookie("token", token, {
@@ -58,7 +58,7 @@ export const createUserController = async (req, res) => {
       res.clearCookie("token", { path: "/" }); // legacy, just in case
       res.clearCookie("admin_token", { path: "/" });
       res.clearCookie("user_token", { path: "/" });
-      const token = generateToken(User);
+      const token = generateAccessToken(User);
 
       // Send the JWT token to the client (stored in an HTTPOnly cookie for security)
       res.cookie("token", token, {
@@ -86,7 +86,7 @@ export const createUserController = async (req, res) => {
 
     if (User && action == "login") {
       // Generate JWT token for the existing user
-      const token = generateToken(User);
+      const token = generateAccessToken(User);
 
       // Send the JWT token to the client (stored in an HTTPOnly cookie for security)
       res.cookie("token", token, {
@@ -131,7 +131,7 @@ export const registerUserController = async (req, res) => {
     const newUser = await registerUser(name, email);
 
     // Generate JWT token
-    const token = generateToken(newUser);
+    const token = generateAccessToken(newUser);
 
     // Send the token in an HTTPOnly cookie
     res.cookie("token", token, {
@@ -179,7 +179,7 @@ export const loginUserController = async (req, res) => {
     res.clearCookie('user_token', cookieOptions);
 
     // Generate JWT token
-    const token = generateToken(user);
+    const token = generateAccessToken(user);
 
     const cookieName = "user_token";
 

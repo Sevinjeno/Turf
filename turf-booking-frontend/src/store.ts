@@ -2,7 +2,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import citySlice from './features/citySlice';
 import adminSlice from './features/admin/adminslice';
-import { useDispatch } from 'react-redux';
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import authSlice from './features/auth/authSlice';
 
 
@@ -18,5 +18,8 @@ export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
 export const useAppDispatch = () => useDispatch<AppDispatch>()
+
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+
 
 export default store;

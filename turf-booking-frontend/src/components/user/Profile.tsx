@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { User } from "lucide-react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store";
 
 interface User {
   name?: string;
@@ -11,10 +13,14 @@ interface ProfileMenuProps {
   user?: User|string; // user can be undefined initially
 }
 
-const ProfileMenu: React.FC<ProfileMenuProps> = ({ user }) => {
+const ProfileMenu: React.FC<ProfileMenuProps> = () => {
+   const user=useSelector((state:RootState)=>state.auth.user)
+   console.log("user",user)
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState( "");
-  const [email, setEmail] = useState( "");
+  const [id, setId] = useState(user?.id);
+  const [name, setName] = useState(user?.name);
+  const [phone, setPhone] = useState(user?.phone);
+  const [email, setEmail] = useState(user?.email);
   const [showEdit, setShowEdit] = useState(false);
 
   const handleSave = () => {

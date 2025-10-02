@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./store.js";
 import { ErrorBoundary } from "react-error-boundary";
+import AuthProvider from "./providers/AuthProviders.js";
 // Define props type for ErrorFallback
 interface ErrorFallbackProps {
   error: Error;
@@ -28,7 +29,9 @@ createRoot(document.getElementById("root")!).render(
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <Provider store={store}>
         <BrowserRouter>
+        <AuthProvider>
           <App />
+        </AuthProvider>
         </BrowserRouter>
       </Provider>
     </ErrorBoundary>

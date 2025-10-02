@@ -1,7 +1,7 @@
 import { saveRefreshToken } from '../../models/userModel.js';
 import { sendOtpToEmail, verifyOtpForEmail } from '../../services/AuthServices/emailService.js';
 import { fetchUserByEmail, registerUser } from '../../services/userService.js';
-import { generateRefreshToken, generateToken } from '../../utils/jwtUtils.js';
+import { generateRefreshToken, generateAccessToken } from '../../utils/jwtUtils.js';
 import { deleteOtp, getOtp } from '../../utils/RedisClient.js';
 
 export const sendEmailOtpController = async (req, res) => {
@@ -54,7 +54,7 @@ console.log("Request Body:", req.body);
     console.log("user",user)
 
       // ✅ Generate tokens
-  const accessToken = generateToken(user);
+  const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
 
     // Save refresh token in DB

@@ -4,6 +4,7 @@ import AuthForm from "../../components/Auth/AuthForm";
 import OtpInput from "../../components/user/OtpInput";
 import { sendOtp, verifyOtp } from '../../services/Users/authServices';
 import { setAccessToken, setUser } from "../../features/auth/authSlice";
+import { useAppDispatch } from "../../store";
 
 const images = [
   "/images/1.jpg",
@@ -14,9 +15,10 @@ const images = [
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const dispatch=useAppDispatch()
   const [loading,setLoading]=useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
+ 
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [showOtpComp, setShowOtpComp] = useState(false);
   const [otp, setOtp] = useState("");
@@ -51,8 +53,8 @@ const handleOtpSubmit = async () => {
   try {
     const res = await verifyOtp(method, value, otp); // call backend verify OTP
     console.log(res?.user,res?.accessToken)
-   setUser(res?.user)
-   setAccessToken(res?.accessToken)
+   dispatch(setUser(res?.user))
+   dispatch(setAccessToken(res?.accessToken))
 
     navigate("/user"); // redirect after success
   } catch (err) {

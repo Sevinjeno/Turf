@@ -1,39 +1,64 @@
-import { getUserByRefreshToken, saveRefreshToken } from "../../models/userModel.js";
-import { generateRefreshToken, generateToken, verifyRefreshToken } from "../../utils/jwtUtils.js";
+import {
+  getUserByRefreshToken,
+  saveRefreshToken,
+} from "../../models/userModel.js";
+import {
+  generateRefreshToken,
+  generateAccessToken,
+  verifyRefreshToken,
+} from "../../utils/jwtUtils.js";
 
 export const refreshTokenController = async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) return res.status(401).json({ message: "No refresh token" });
+    const oldRefreshToken = req.cookies.refreshToken;
+    if (!oldRefreshToken) {
+      return res.status(401).json({ message: "No refresh token" });
+    }
 
-    // Check DB
-    const user = await getUserByRefreshToken(refreshToken);
-    if (!user) return res.status(403).json({ message: "Invalid refresh token" });
+    console.log("Checking Refresh Token", oldRefreshToken);
 
-    // Verify JWT
+    // 1️⃣ Verify refresh token (JWT signature & expiry)
+    let decoded;
     try {
-      verifyRefreshToken(refreshToken);
+      decoded = verifyRefreshToken(oldRefreshToken);
     } catch (err) {
       return res.status(403).json({ message: "Expired refresh token" });
     }
 
-    // Generate new tokens
-    const newAccessToken = generateToken(user);
-    const newRefreshToken = generateRefreshToken(user); 
+    // 2️⃣ Check in DB if refresh token exists for a user
+    const user = await getUserByRefreshToken(oldRefreshToken);
+    if (!user) {
+      console.log("User not found for this refresh token");
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
 
-    // Update DB
+    console.log("User found:", user.email);
+
+    // 3️⃣ Generate new tokens
+    const newAccessToken = generateAccessToken(user);
+    const newRefreshToken = generateRefreshToken(user);
+
+    // 4️⃣ Save new refresh token in DB (rotate)
     await saveRefreshToken(user.id, newRefreshToken);
 
-    // Set cookie
+    // 5️⃣ Send new refresh token in cookie
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
-      secure: false,
+      secure: false, // true in prod with HTTPS
       sameSite: "strict",
       path: "/",
     });
 
-    return res.json({ accessToken: newAccessToken });
-
+    // 6️⃣ Send new access token + user info in body
+    return res.json({
+      accessToken: newAccessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+    });
   } catch (err) {
     console.error("Refresh token error:", err);
     return res.status(500).json({ message: "Server error" });

@@ -1,7 +1,7 @@
 import redis, { storeOtp, getOtp, deleteOtp } from '../../utils/redisClient.js';
 import { generateOtp } from '../../utils/OtpUtils.js';
 import { fetchUserByEmail, registerUser } from '../userService.js';
-import { generateToken } from '../../utils/jwtUtils.js';
+import { generateAccessToken } from '../../utils/jwtUtils.js';
 import { emailTransporter } from '../../configs/emailConfig.js';
 
 const OTP_EXPIRE_TIME = 300; // 5 minutes
@@ -51,6 +51,6 @@ export const verifyOtpForEmail = async (email, otp) => {
     if (!user) {
         user = await registerUser({ email });
     }
-    const token = generateToken(user);
+    const token = generateAccessToken(user);
     return { token, user };
 };
