@@ -1,6 +1,7 @@
 import express from 'express';
-import { createUserController, getAllUsersController, getUserController, getUserSelfController, loginUserController, registerUserController } from '../controllers/userController.js';
+import { createUserController, getAllUsersController, getUserController, getUserSelfController, loginUserController, registerUserController, updateUserProfile, UploadAvatar } from '../controllers/userController.js';
 import { authenticate } from '../middlewares/authMiddleware.js';
+import { upload } from '../utils/Multer.js';
 const router = express.Router();
 
 // router.use(authenticate);
@@ -17,6 +18,10 @@ router.get('/me', authenticate, getUserSelfController);
 router.get('/:id', authenticate, getUserController);
 
 router.get('/', getAllUsersController);
+
+router.put('/update-profile', authenticate, updateUserProfile);
+
+router.post('/avatar',upload.single('avatar'),UploadAvatar)
 //email
 // router.post('/send-otp', sendOTPController);  // Route to send OTP
 // router.post('/verify-otp', verifyOTPController); // Route to verify OTP
