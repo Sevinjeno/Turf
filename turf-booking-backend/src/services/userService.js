@@ -61,4 +61,19 @@ export const fetchAllUsers = async () => {
     }
 };
 
+// Update user profile
+export const updateUserProfileService = async (id, userData) => {
+  try {
+    const { name, email, phone, avatar } = userData;
+    const updatedUser = await userModel.updateUserProfileModel(id, name, email, phone, avatar);
+    return updatedUser;
+  } catch (error) {
+    throw new Error('Error updating user profile: ' + error.message);
+  }
+};
+
+
+
+
+
 

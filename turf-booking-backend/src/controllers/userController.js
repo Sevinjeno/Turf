@@ -3,7 +3,9 @@ import {
   fetchUserById,
   fetchUserByEmail,
   fetchAllUsers,
+  updateUserProfileService,
 } from "../services/userService.js";
+import cloudinary from "../utils/Cloudinary.js";
 import { generateAccessToken } from "../utils/jwtUtils.js";
 import { userValidationSchema } from "../validators/userValidator.js";
 
@@ -243,5 +245,42 @@ export const getAllUsersController = async (req, res) => {
     res
       .status(500)
       .json({ message: "Failed to fetch users", error: error.message });
+  }
+};
+
+export const updateUserProfile = async (req, res) => {
+  try {
+    const userId = req.user?.id; // assuming you have auth middleware
+    console.log("userId",userId)
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const updatedUser = await updateUserProfileService(userId, req.body);
+
+    res.status(200).json({ user: updatedUser });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ message: 'Failed to update profile' });
+  }
+};
+
+
+export const UploadAvatar = async (req, res) => {
+  try {
+    const file = req.file;
+    if (!file) return res.status(400).json({ message: 'No file uploaded' });
+
+    // Convert file buffer → Base64
+    const base64 = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(base64, {
+      folder: 'user_avatars',
+      transformation: [{ width: 300, height: 300, crop: 'fill' }],
+    });
+
+    res.json({ url: result.secure_url });
+  } catch (error) {
+    console.error('Cloudinary upload error:', error);
+    res.status(500).json({ message: 'Failed to upload image' });
   }
 };

@@ -79,3 +79,19 @@ export const deleteRefreshToken = async (userId) => {
   const query = `UPDATE users SET refresh_token = NULL WHERE id = $1`;
   await pool.query(query, [userId]);
 };
+
+//update 
+export const updateUserProfileModel = async (id, name, email, phone, avatar) => {
+  const query = `
+    UPDATE users
+    SET name = $1, email = $2, phone = $3, avatar = $4
+    WHERE id = $5
+    RETURNING id, name, email, phone, avatar;
+  `;
+  const values = [name, email, phone, avatar, id];
+  const result = await pool.query(query, values);
+  return result.rows[0];
+};
+
+
+
