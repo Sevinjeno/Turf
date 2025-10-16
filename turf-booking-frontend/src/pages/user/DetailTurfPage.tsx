@@ -48,8 +48,6 @@ function DetailTurfPage() {
   const [courts, setCourts] = useState<any[]>([]);
   const [selectedCourt, setSelectedCourt] = useState<string>("");
   let user = {name:"",id:"",email:""};
-console.log(user)
-
 
   // Fetch courts for the turf
 
