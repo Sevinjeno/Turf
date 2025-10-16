@@ -1,21 +1,35 @@
-name: Build Backend Image
+name: Backend CI/CD
+
 on:
   push:
+    branches:
+      - main
     paths:
-      - 'turf-backend/**'
-      - '.github/workflows/backend-build.yml'
+      - 'turf-booking-backend/**'
+      - '.github/workflows/backend-ci.yml'
+
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Login to Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-      - uses: docker/build-push-action@v5
-        with:
-          context: ./turf-backend
-          push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/turf-backend:latest
+
+      # Step 3: Build backend image
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/turf-backend:latest ./turf-booking-backend
+
+      # Step 4: Push backend image
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/turf-backend:latest
