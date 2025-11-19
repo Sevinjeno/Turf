@@ -30,11 +30,15 @@ const CourtDropdown: React.FC<CourtDropdownProps> = ({
         className="w-1/2 border rounded-lg p-2 text-gray-700"
       >
         <option value="">Choose a court</option>
-        {courts.map((court) => (
-          <option key={court.id} value={court.id}>
-            {court.name}
-          </option>
-        ))}
+        {Array.isArray(courts) && courts.length > 0 ? (
+          courts.map((court) => (
+            <option key={court.id} value={court.id}>
+              {court.name}
+            </option>
+          ))
+        ) : (
+          <option disabled>No courts available</option>
+        )}
       </select>
     </div>
   );

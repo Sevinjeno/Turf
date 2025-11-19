@@ -1,105 +1,199 @@
 // src/components/Navbar.tsx
-import React, { useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../store';
-import { setQuery, setCities, setCityCoordinates } from '../../features/citySlice';
-import axios from 'axios';
-import { User } from '../../types/user';
+import React, { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../store";
+import {
+  setQuery,
+  setCities,
+  setCityCoordinates,
+} from "../../features/citySlice";
+import axios from "axios";
+import { User } from "../../types/user";
 
-//! Infinite Scrolling / Lazy loading will be added later ...
-
-//  ?   Debouncing and Caching in Implemented
-
-type NavbarProps = {
-  user?: User|string; // Define the type of user if known  
+type NavbarProps = { 
+  user?: User | string;
+  children?: React.ReactNode;
 };
 
-function Navbar_(props:NavbarProps) {
-  const dispatch = useDispatch(); // Dispatch actions
-  const query = useSelector((state: any) => state.city.query); // Access query from Redux state
-  const cities = useSelector((state: any) => state.city.cities); // Access cities from Redux state
-  const [selected,setSelected]=useState<string>("")
-  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+function Navbar({ user, children }: NavbarProps) {
+  const dispatch = useDispatch();
 
-  const handleSearch = async (searchvalue:any) => {
-    const searchValue = searchvalue ;
-    dispatch(setQuery(searchValue)); // Update the query in Redux state
+  const query = useSelector((s: RootState) => s.city.query);
+  const cities = useSelector((s: RootState) => s.city.cities);
 
-    if (searchValue.length > 0) {
-      try {
-        const response = await axios.get('https://nominatim.openstreetmap.org/search', {
-          params: {
-            q: searchValue,
-            format: 'json',
-          },
-        });
+  const [loading, setLoading] = useState(false);
+  const [nearbyLoading, setNearbyLoading] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(false);
 
-        const cityResults = response.data.filter((item: any) => 
-          item.osm_type === 'node' || item.osm_type === 'relation'
-        );
-        dispatch(setCities(cityResults)); // Update cities in Redux state
-      } catch (error) {
-        console.error('Error fetching city data:', error);
+  const debounceTimeout = useRef<number | null>(null);
+  const cacheRef = useRef<Record<string, any[]>>({});
+  const mounted = useRef(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // ------------- CLOSE DROPDOWN WHEN CLICK OUTSIDE --------------
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpenDropdown(false);
       }
     }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  // ------------- FETCH TURFS NEAR A LOCATION --------------
+  const fetchTurfsNear = async (lat: number, lon: number) => {
+    setNearbyLoading(true);
+    try {
+      await axios.get("/api/turfs", { params: { lat, lon } });
+    } catch (e) {
+      console.error("fetchTurfsNear error", e);
+    } finally {
+      if (mounted.current) setNearbyLoading(false);
+    }
   };
 
-  const handleCityClick = (city:any) => {
-    setSelected(city.display_name)
-     // Fetch the latitude and longitude of the selected city
-     const lat = +city.lat;  // Assuming the latlon object exists in the response
-     const lon = +city.lon;  // Assuming the latlon object exists in the response
-    dispatch(setQuery(""));
-    // Dispatch the latitude and longitude to Redux store
+  // ------------- ON MOUNT: GEOLOCATION --------------
+  useEffect(() => {
+    mounted.current = true;
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+
+          dispatch(setCityCoordinates({ lat, lon }));
+          fetchTurfsNear(lat, lon);
+        },
+        (err) => console.warn("Geolocation error:", err),
+        { maximumAge: 60000, timeout: 10000 }
+      );
+    }
+
+    return () => {
+      mounted.current = false;
+      if (debounceTimeout.current) window.clearTimeout(debounceTimeout.current);
+    };
+  }, [dispatch]);
+
+  // ------------- SEARCH FUNCTION --------------
+  const handleSearch = async (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      dispatch(setCities([]));
+      return;
+    }
+
+    // check cache
+    if (cacheRef.current[trimmed]) {
+      dispatch(setCities(cacheRef.current[trimmed]));
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { data } = await axios.get(
+        "https://nominatim.openstreetmap.org/search",
+        {
+          params: {
+            q: trimmed,
+            format: "json",
+            addressdetails: 1,
+            countrycodes: "in", // ONLY INDIA
+            limit: 20,
+          },
+        }
+      );
+
+      cacheRef.current[trimmed] = data;
+      dispatch(setCities(data));
+    } catch (err) {
+      console.error("Search error:", err);
+    } finally {
+      if (mounted.current) setLoading(false);
+    }
+  };
+
+  // ------------- INPUT CHANGE HANDLER (DEBOUNCE) --------------
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    dispatch(setQuery(value)); // store value
+
+    if (debounceTimeout.current) window.clearTimeout(debounceTimeout.current);
+
+    debounceTimeout.current = window.setTimeout(() => {
+      handleSearch(value);
+      setOpenDropdown(true);
+    }, 450);
+  };
+
+  // ------------- WHEN USER CLICKS A CITY --------------
+  const handleCitySelect = (city: any) => {
+    dispatch(setQuery(city.display_name));
+
+    const lat = Number(city.lat);
+    const lon = Number(city.lon);
     dispatch(setCityCoordinates({ lat, lon }));
 
-  };
+    setOpenDropdown(false);
 
-  //? Debouncing function 
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const searchValue:any = event.target.value;
-    dispatch(setQuery(searchValue));
-    if (debounceTimeout.current) {
-      clearTimeout(debounceTimeout.current); // Clear previous timeout
-    }
-    debounceTimeout.current = setTimeout(() => handleSearch(searchValue), 300); // Delay the request by 300ms
+    fetchTurfsNear(lat, lon);
   };
 
   return (
-    <div className="flex justify-between items-center bg-white shadow-md p-4">
-      <div className="text-lg font-bold text-blue-600">7Jeno</div>
-      <div className="flex flex-col w-[700px] items-center relative">
-        <div className="flex">
-          <input
-            type="text"
-            value={query}
-            onChange={handleInputChange}
-            placeholder="Search for a city"
-            className="w-full p-2 text-sm"
-          />
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-2">Search</button>
-        </div>
-        <div>
-          {query && (
-            <ul className="absolute w-[300px] mt-1 ml-[-8rem] overflow-y-auto bg-white border border-gray-300 shadow-lg z-10">
-              {cities.map((city:any, index:any) => (
-                <li
-                  key={index}
-                  // className="p-2 border-b border-gray-300 cursor-pointer truncate hover:bg-gray-100"
-                  onClick={() => handleCityClick(city)}
-                >
-                  {city.display_name}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+ <nav className="flex items-center justify-between px-4 py-2 bg-white shadow-md w-full">
 
-        {selected && <div>{selected}</div>}
-      </div>
+  {/* LEFT + CENTER */}
+  <div className="flex items-center gap-20 flex-1" ref={containerRef}>
+
+    {/* LOGO */}
+    <div className="text-lg font-bold text-blue-600 cursor-pointer">
+      7Jeno
     </div>
+
+    {/* SEARCH */}
+    <div className="flex flex-col w-[600px] relative">
+      <input
+        type="text"
+        className="border px-3 py-2 rounded-md shadow-sm w-full focus:ring-2 focus:ring-blue-300"
+        placeholder="Search cities..."
+        value={query}
+        onChange={handleInputChange}
+        onFocus={() => cities.length > 0 && setOpenDropdown(true)}
+      />
+
+      {openDropdown && cities.length > 0 && (
+        <div className="absolute top-[110%] left-0 w-full max-h-[300px] overflow-auto bg-white border shadow-lg rounded-md z-20">
+          {cities.map((city: any, idx: number) => (
+            <div
+              key={idx}
+              className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+              onClick={() => handleCitySelect(city)}
+            >
+              {city.display_name}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {loading && (
+        <div className="absolute top-[110%] left-0 w-full bg-white px-3 py-2 shadow-md">
+          Loading...
+        </div>
+      )}
+    </div>
+  </div>
+
+  {/* RIGHT SIDE → Profile Menu */}
+  <div className="flex items-center ml-4">
+    {children}
+  </div>
+
+</nav>
   );
 }
 
-export default Navbar_;
+export default Navbar;

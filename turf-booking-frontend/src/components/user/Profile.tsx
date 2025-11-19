@@ -11,9 +11,11 @@ interface User {
   phone?: string;
   avatar?: string; // profile photo URL
 }
+interface ProfileMenuProps {
+  user: User | null;   // or undefined depending on your Redux default
+}
 
-const ProfileMenu: React.FC = () => {
-  const user = useSelector((state: RootState) => state.auth.user);
+const ProfileMenu: React.FC<ProfileMenuProps> = ({user}) => {
 
   const [open, setOpen] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
