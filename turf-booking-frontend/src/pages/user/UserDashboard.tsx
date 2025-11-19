@@ -4,30 +4,32 @@ import Navbar_ from '../../components/user/Navbar_'
 import TurfList from '../../components/user/TurfList'
 import FilterBar from '../../components/user/Filterbar'
 import ProfileMenu from '../../components/user/Profile'
+import { useSelector } from 'react-redux'
+import type { RootState } from '@/store'
 
 const UserDashboard = () => {
+    const user = useSelector((state: RootState) => state.auth.user);
   
-       let user={id:"",name:"",email:""}
-       console.log("userData", user);
  
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-100">
                 {/* Navbar */}
-                 <div className="flex items-center justify-between bg-white shadow-md px-4 py-2">
-                    <Navbar_  />
-                    <ProfileMenu user={user} />
-                  </div>
+                 <div className="bg-white shadow-md w-full">
+                        <Navbar_ >
+                            <ProfileMenu user={user} />
+                        </Navbar_>
+                        </div>
                 {/* Main Content Area */}
                 <div className="flex flex-1 flex-col">
                 {/* Left Sidebar - Dashboard Content */}
                 <div className="w-full bg-white shadow-md">
-                    <DashboardContent />
+                    <DashboardContent user={user} />
                 </div>
-
-                <div className="w-full p-4">
+               
+                {/* <div className="w-full p-4">
                  <FilterBar />
-                </div>
+                </div> */}
                 
                 {/* Right Content - Turf List */}
                 <div className="w-full p-4">
