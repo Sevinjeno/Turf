@@ -1,11 +1,20 @@
-When user opens app:
 
-    Ask for location
+Working on Super admin tasks
 
-    If allowed → show “Turfs near me” instantly
+   ## The Super Admin is the platform owner:
 
-    If denied → fall back to search bar
+      Your Super Admin will do only four things, but do them perfectly:
 
-    When typing in search → debounce and cache
+        Create & manage turf admins
 
-    On city select → recenter map & fetch nearest turfs
+        See all users (read-only)
+
+        See & manage all turfs
+
+        Control pricing & visibility
+
+
+
+# Important 
+
+thing about courts logic with timing for user, as some courts timing will conflicts 

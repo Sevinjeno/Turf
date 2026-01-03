@@ -2,14 +2,14 @@ import axios from "axios";
 // api.ts
 import store from "../store";
 import { setAccessToken, logout } from "../features/auth/authSlice";
-export const API_URL = "http://localhost:3000/api/slots";
+export const API_URL = "http://localhost:3000/api/";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000/api", // backend URL
+  baseURL: "http://localhost:3000/api/", // backend URL
   headers: {
     "Content-Type": "application/json",
   },
-  // withCredentials: true,
+  withCredentials: true,
 });
 
 let isRefreshing = false;

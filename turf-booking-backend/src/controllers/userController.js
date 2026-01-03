@@ -28,15 +28,14 @@ export const createUserController = async (req, res) => {
     if (!User) {
       try {
         User = await registerUser(name, email);
-        res.clearCookie("token", { path: "/" }); // legacy, just in case
         res.clearCookie("admin_token", { path: "/" });
         res.clearCookie("user_token", { path: "/" });
 
         // Generate JWT token after user registration
-        const token = generateAccessToken(User);
+        const user_token = generateAccessToken(User);
 
         // Send the JWT token to the client (stored in an HTTPOnly cookie for security)
-        res.cookie("token", token, {
+        res.cookie("user_token", user_token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "Strict",
@@ -57,13 +56,12 @@ export const createUserController = async (req, res) => {
     } else {
 
       // Generate JWT token for the existing user
-      res.clearCookie("token", { path: "/" }); // legacy, just in case
       res.clearCookie("admin_token", { path: "/" });
       res.clearCookie("user_token", { path: "/" });
-      const token = generateAccessToken(User);
+      const user_token = generateAccessToken(User);
 
       // Send the JWT token to the client (stored in an HTTPOnly cookie for security)
-      res.cookie("token", token, {
+      res.cookie("user_token", user_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "Strict",
@@ -88,10 +86,10 @@ export const createUserController = async (req, res) => {
 
     if (User && action == "login") {
       // Generate JWT token for the existing user
-      const token = generateAccessToken(User);
+      const user_token = generateAccessToken(User);
 
       // Send the JWT token to the client (stored in an HTTPOnly cookie for security)
-      res.cookie("token", token, {
+      res.cookie("user_token", user_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "Strict",
@@ -133,10 +131,10 @@ export const registerUserController = async (req, res) => {
     const newUser = await registerUser(name, email);
 
     // Generate JWT token
-    const token = generateAccessToken(newUser);
+    const user_token = generateAccessToken(newUser);
 
     // Send the token in an HTTPOnly cookie
-    res.cookie("token", token, {
+    res.cookie("user_token", user_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Strict",
@@ -176,17 +174,16 @@ export const loginUserController = async (req, res) => {
     };
 
     // Clear all potentially conflicting cookies
-    res.clearCookie('token', cookieOptions);
     res.clearCookie('admin_token', cookieOptions);
     res.clearCookie('user_token', cookieOptions);
 
     // Generate JWT token
-    const token = generateAccessToken(user);
+    const user_token = generateAccessToken(user);
 
     const cookieName = "user_token";
 
     // Send the token in an HTTPOnly cookie
-    res.cookie(cookieName, token, {
+    res.cookie(cookieName, user_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Strict",

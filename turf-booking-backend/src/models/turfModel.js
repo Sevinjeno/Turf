@@ -43,7 +43,6 @@ export const createTurf = async (
       courts,
       city,
     ];
-console.log("values",values)
     const result = await client.query(query, values);
     const newTurf = result.rows[0];
 
@@ -54,7 +53,6 @@ console.log("values",values)
         [newTurf.id, `Court ${i}`]
       );
     }
-console.log("courts",courts)
     await client.query("COMMIT"); // ✅ commit only if all succeeded
     return newTurf;
 
@@ -118,7 +116,9 @@ export const getTurfsByAdminId = async (adminId) => {
       ST_Y(location::geometry) AS latitude,
       start_time,
       end_time,
-      price
+      price,
+      courts,
+      city
     FROM turfs
     WHERE admin_id = $1;
   `;

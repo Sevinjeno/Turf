@@ -23,9 +23,7 @@ export default function AdminPage() {
   async function handleLogout() {
     // Handle login logic here
     let res = await logoutAdminApi();
-    console.log("res", res);
     if (res) {
-      console.log("Logout successful");
       navigate("/admin");
     } else {
       console.error("Logout failed");

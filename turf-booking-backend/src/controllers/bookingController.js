@@ -4,7 +4,9 @@ import { checkBookingConflict, createBookingService, getBookingsByTurfAndDate, }
  * Controller to create a booking.
  */
 export const createBookingController = async (req, res) => {
-  const { turf_id, court_id, start_time, end_time, user_id } = req.body;
+  const { turf_id, court_id, start_time, end_time} = req.body;
+    const user_id = req.user.id;
+    console.log("user_id",user_id)
   try {
     const hasConflict = await checkBookingConflict(turf_id, court_id, start_time, end_time);
     if (hasConflict) {
