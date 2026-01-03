@@ -52,7 +52,6 @@ const handleAuthSubmit = async (submitMethod: "email" | "phone", data: string) =
 const handleOtpSubmit = async () => {
   try {
     const res = await verifyOtp(method, value, otp); // call backend verify OTP
-    console.log(res?.user,res?.accessToken)
    dispatch(setUser(res?.user))
    dispatch(setAccessToken(res?.accessToken))
 

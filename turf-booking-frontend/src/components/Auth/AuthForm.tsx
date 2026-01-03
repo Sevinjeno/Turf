@@ -71,7 +71,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSubmit, loading }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submit");
     if (!isValid) return; // Don't submit if invalid
     if (authMode === "phone" || authMode === "email") {
       onSubmit(authMode, formData[authMode]);

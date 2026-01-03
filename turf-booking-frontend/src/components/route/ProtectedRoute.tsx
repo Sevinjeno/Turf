@@ -7,7 +7,6 @@ import { Navigate } from "react-router-dom";
 const ProtectedRoute=({children}:{children:JSX.Element})=>{
 
     const { accessToken } = useAppSelector((state) => state.auth);
-    console.log("Protected Route",accessToken)
 
       if (!accessToken) {
     // Not logged in → redirect

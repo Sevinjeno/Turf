@@ -17,6 +17,7 @@ const CourtDropdown: React.FC<CourtDropdownProps> = ({
   selectedCourt,
   setSelectedCourt,
 }) => {
+  console.log("courts",courts)
   if (!courts || courts.length <= 1) return null; // hide if only 1 court
 
   return (

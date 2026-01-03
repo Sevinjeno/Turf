@@ -6,7 +6,6 @@ import { deleteOtp, getOtp } from '../../utils/RedisClient.js';
 
 export const sendEmailOtpController = async (req, res) => {
   const { email } = req.body;
-  console.log(email)
     try {
         await sendOtpToEmail(email);
         res.status(200).json({ message: 'OTP sent to email' });
@@ -17,13 +16,9 @@ export const sendEmailOtpController = async (req, res) => {
 
 export const verifyEmailOtpController = async (req, res) => {
   const { email, otp } = req.body; // always declared before try
-console.log("Request Body:", req.body);
   try {
-    console.log("email", email);
-    console.log("otp", otp);
 
     const storedOtp = await getOtp(email);
-    console.log("Stored OTP:", storedOtp);
 
     if (!storedOtp) {
       // OTP expired or never issued
@@ -50,9 +45,6 @@ console.log("Request Body:", req.body);
   });
     }
 
-
-    console.log("user",user)
-
       // ✅ Generate tokens
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
@@ -60,10 +52,17 @@ console.log("Request Body:", req.body);
     // Save refresh token in DB
     await saveRefreshToken(user?.id, refreshToken);
 
-  res.cookie("refreshToken", refreshToken, {
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      path: "/",
+    });
+
+    res.cookie("user_token", accessToken, {
     httpOnly: true,
     secure: false,
-    sameSite: "strict",
+    sameSite: "lax", // Strict blocks cookies between 5173 → 3000
     path: "/",
   });
 

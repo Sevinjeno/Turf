@@ -65,6 +65,7 @@ function DetailTurfPage() {
     };
 
     const fetchCourts = async () => {
+      console.log("Inside courts")
       try {
         const courtsData = await getCourtsbyTurfId(id || "");
         setCourts(courtsData);
@@ -104,11 +105,11 @@ function DetailTurfPage() {
       ).toISOString();
       const bookingData = {
         turf_id: id, // Replace with actual turfId
-        user_id: user?.id, // Replace with actual userId (maybe from auth context)
         start_time: startTime, // Use correct datetime format
         end_time: endTime,
         slot_id: null, // Optional, can be null or the slot id
-        court_id: selectedCourt, // Use selected court
+        // court_id: selectedCourt || 1, // Use selected court
+        court_id: null, // Use selected court
       };
       const result = await createBooking(bookingData);
       setSelectedSlot({ start: null, end: null });

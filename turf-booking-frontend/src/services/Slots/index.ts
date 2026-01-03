@@ -3,7 +3,7 @@ import axios from "axios";
 import { API_URL } from "../api";
 
 export const fetchTurfSlots = async (turfId: any, date: string) => {
-  const response = await axios.get(`${API_URL}/api/slots/${turfId}/${date}`);
+  const response = await axios.get(`${API_URL}slots/${turfId}/${date}`);
   return response.data;
 };
 

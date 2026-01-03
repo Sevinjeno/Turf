@@ -9,8 +9,6 @@ import type { RootState } from '@/store'
 
 const UserDashboard = () => {
     const user = useSelector((state: RootState) => state.auth.user);
-  
- 
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-100">
