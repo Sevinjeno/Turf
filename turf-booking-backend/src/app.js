@@ -16,6 +16,8 @@ import authRoutes from "./routes/authRoutes.js"
 import "./configs/passport.js"
 import cookieParser from 'cookie-parser';
 import { errorHandler } from './middlewares/errorHandler.js';
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./swagger.js";
 const app = express();
 
 // Enable CORS for your frontend's origin
@@ -63,6 +65,7 @@ app.use("/uploads", express.static("uploads"));
 app.use('/api/superadmin', superAdminRoutes);
 app.use('/api/slots',slotRoutes);
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 //error handling 
 app.use(errorHandler);
