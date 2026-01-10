@@ -30,7 +30,7 @@ end_time
 
 base_price
 platform_fee
-total_amount
+total_price
 
 admin_earning
 platform_earning

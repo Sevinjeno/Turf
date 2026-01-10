@@ -43,3 +43,27 @@ export const getBookingsByTurfAndDate = async (turfId, date) => {
     return [];
   }
 };
+
+
+//calculate Booking Price
+
+export const calculateBookingPrice=({
+  basePrice,
+  platformFeePercent
+}
+)=>{
+ 
+  const platformFee=Math.round((basePrice * platformFeePercent )/100);
+
+  const totalAmount=basePrice+platformFee;
+
+  return{
+    basePrice,
+    platformFee,
+    totalAmount,
+    adminEarning:basePrice,
+    platformEarning:platformFee
+  }
+
+
+}
