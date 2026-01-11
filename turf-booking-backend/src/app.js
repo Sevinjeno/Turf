@@ -13,6 +13,7 @@ import courtRoutes from "./routes/courtRoutes.js";
 import cors from 'cors'; 
 import passport from 'passport';
 import authRoutes from "./routes/authRoutes.js"
+import checkRoutes from "./routes/checkRoutes.js"
 import "./configs/passport.js"
 import cookieParser from 'cookie-parser';
 import { errorHandler } from './middlewares/errorHandler.js';
@@ -58,6 +59,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/turfs', turfRoutes);
 app.use("/api/courts", courtRoutes);
+app.use('/api/check',checkRoutes) // for checking purpose
 //Image
 app.use("/uploads", express.static("uploads"));
 
