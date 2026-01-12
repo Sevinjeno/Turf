@@ -1,6 +1,6 @@
 import { deleteRefreshToken, getUserByRefreshToken } from "../../models/userModel.js";
 
-export const logoutController = async (req, res) => {
+export const  logoutController = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) return res.status(400).json({ message: "No refresh token" });

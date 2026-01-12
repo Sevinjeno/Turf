@@ -209,3 +209,11 @@ export const updateTurfInDB = async (
     client.release();
   }
 };
+
+
+export const getTurfPriceById=async(turf_id)=>{
+const result=await pool.query(
+  `Select price FROM turf WHERE id=$1`,[turf_id]
+);
+  return result.rows[0]
+}

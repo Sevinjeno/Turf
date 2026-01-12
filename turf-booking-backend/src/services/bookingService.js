@@ -1,15 +1,22 @@
 import pool from '../configs/dbConfig.js';
-import { createBooking, getBookingsByUser } from '../models/bookingModel.js';
+import { insertBooking } from '../models/bookingModel.js';
+import { getPlatformFeePercent } from '../models/platformSettings.model.js';
+import { getTurfById } from '../models/turfModel.js';
 
-export const createBookingService = async (user_id, turf_id, court_id, start_time, end_time) => {
-  const result = await pool.query(
-    `INSERT INTO bookings (user_id, turf_id, court_id, start_time, end_time, status)
-     VALUES ($1, $2, $3, $4, $5, 'confirmed')
-     RETURNING *`,
-    [user_id, turf_id, court_id, start_time, end_time]
-  );
-  return result.rows[0];
-};
+//! IMPORTANT:
+// - Minimum booking = 1 hour
+// - Extensions only in 30-minute blocks
+// - Price calculated here, never in frontend
+
+// export const createBookingService = async (user_id, turf_id, court_id, start_time, end_time) => {
+//   const result = await pool.query(
+//     `INSERT INTO bookings (user_id, turf_id, court_id, start_time, end_time, status)
+//      VALUES ($1, $2, $3, $4, $5, 'confirmed')
+//      RETURNING *`,
+//     [user_id, turf_id, court_id, start_time, end_time]
+//   );
+//   return result.rows[0];
+// };
 
 export const checkBookingConflict = async (turf_id, court_id, start_time, end_time) => {
   const result = await pool.query(
@@ -42,4 +49,96 @@ export const getBookingsByTurfAndDate = async (turfId, date) => {
     console.error(err);
     return [];
   }
+};
+
+
+
+export const createBookingService = async ({
+  user_id,
+  turf_id,
+  court_id,
+  start_time,
+  end_time,
+}) => {
+  const conflict = await checkBookingConflict(
+    turf_id,
+    court_id,
+    start_time,
+    end_time
+  );
+  if (conflict) throw new Error("SLOT_CONFLICT");
+
+  const turf = await getTurfById(turf_id);
+  const platformFeePercent = await getPlatformFeePercent();
+
+  const durationInHours =
+    (new Date(end_time) - new Date(start_time)) / (1000 * 60 * 60);
+
+  const price = calculateBookingPrice({
+    basePrice: turf.price,
+    platformFeePercent,
+    durationInHours,
+  });
+
+  return insertBooking({
+    user_id,
+    turf_id,
+    court_id,
+    start_time,
+    end_time,
+    status: "confirmed",
+    base_price: price.baseAmount,
+    platform_fee: price.platformFee,
+    total_amount: price.totalAmount,
+    admin_earning: price.adminEarning,
+    platform_earning: price.platformEarning,
+  });
+};
+
+
+//calculate Booking Price
+
+export const calculateBookingPrice=({
+  basePrice,
+  platformFeePercent
+}
+)=>{
+ 
+  const platformFee=Math.round((basePrice * platformFeePercent )/100);
+
+  const totalAmount=basePrice + platformFee;
+
+  return{
+    basePrice,
+    platformFee,
+    totalAmount,
+    adminEarning:basePrice,
+    platformEarning:platformFee
+  }
+
+
+}
+
+// Preview Price 
+export const previewBookingPriceService = async ({
+  turf_id,
+  start_time,
+  end_time,
+}) => {
+  const turf = await getTurfById(turf_id);
+  const platformFeePercent = await getPlatformFeePercent();
+
+
+  // const durationInHours =
+  //   (new Date(end_time) - new Date(start_time)) / (1000 * 60 * 60);
+
+  // if (durationInHours <= 0) {
+  //   throw new Error("INVALID_DURATION");
+  // }
+
+  return calculateBookingPrice({
+    basePrice: turf.price,
+    platformFeePercent,
+    // durationInHours,
+  });
 };
