@@ -67,17 +67,24 @@ export const createBookingService = async ({
     end_time
   );
   if (conflict) throw new Error("SLOT_CONFLICT");
+  
+  const start = new Date(start_time);
+  const end = new Date(end_time);
+
+  // 1. Enforce duration rules
+  const durationMinutes = validateBookingDuration(start, end);
+
+  const durationHours = durationMinutes / 60;
 
   const turf = await getTurfById(turf_id);
+  if (!turf) throw new Error("TURF_NOT_FOUND");
   const platformFeePercent = await getPlatformFeePercent();
 
-  const durationInHours =
-    (new Date(end_time) - new Date(start_time)) / (1000 * 60 * 60);
+  const totalBaseAmount = turf.price * durationHours;
 
   const price = calculateBookingPrice({
-    basePrice: turf.price,
+    totalBaseAmount,
     platformFeePercent,
-    durationInHours,
   });
 
   return insertBooking({
