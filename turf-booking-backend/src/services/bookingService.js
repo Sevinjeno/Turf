@@ -2,6 +2,7 @@ import pool from '../configs/dbConfig.js';
 import { insertBooking } from '../models/bookingModel.js';
 import { getPlatformFeePercent } from '../models/platformSettings.model.js';
 import { getTurfById } from '../models/turfModel.js';
+import { validateBookingDuration } from '../utils/ValidateBookingGenerations.js';
 
 export const getBookingsByTurfAndDate = async (turfId, date) => {
   try {
@@ -59,17 +60,21 @@ export const calculateBookingPrice=({
   platformFeePercent
 }
 )=>{
+
+console.log("basePrice",basePrice)
+
+console.log("platformFeePercent",platformFeePercent)
+
  
   const platformFee=Math.round((basePrice * platformFeePercent )/100);
 
   const totalAmount=basePrice + platformFee;
-
+console.log("platformFee",platformFee)
   return{
     basePrice,
     platformFee,
     totalAmount,
     adminEarning:basePrice,
-    platformEarning:platformFee
   }
 
 
@@ -89,13 +94,11 @@ export const previewBookingPriceService = async ({
     new Date(end_time)
   );
 
-  const platform_fee_percent = await getPlatformFeePercent();
-
-  const base_amount = turf.price * durationHours;
-
+  const platformFeePercent = await getPlatformFeePercent();
+  const basePrice = turf.price * durationHours;
   return calculateBookingPrice({
-    base_amount,
-    platform_fee_percent,
+    basePrice,
+    platformFeePercent,
   });
 };
 
@@ -166,6 +169,5 @@ export const confirmBookingAfterPaymentService = async ({
     platform_fee: price.platformFee,
     total_amount: price.totalAmount,
     admin_earning: price.adminEarning,
-    platform_earning: price.platformEarning,
   });
 };

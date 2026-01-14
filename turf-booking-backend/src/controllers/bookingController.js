@@ -42,8 +42,10 @@ import { checkBookingConflict,  getBookingsByTurfAndDate, previewBookingPriceSer
 // }
 
 export const previewBookingController=async(req,res)=>{
+   console.log("req",req.body)
    try{
    const price = await previewBookingPriceService (req.body)
+   console.log("Price",price)
    res.status(200).json(price)
    }catch(err){
       res.status(400).json({error:err.message});
