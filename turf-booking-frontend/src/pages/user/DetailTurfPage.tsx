@@ -98,7 +98,7 @@ const durationMinutes: number = end.diff(start, "minute");
         }
       );
 
-      setPricePreview(result.data);
+      setPricePreview(result);
     } catch (err: any) {
       setPricePreview(null);
       setPriceError("Unable to calculate price");

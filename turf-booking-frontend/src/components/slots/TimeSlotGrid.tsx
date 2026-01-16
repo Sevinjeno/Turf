@@ -192,9 +192,9 @@ const renderPreview = () => {
       </div>
     )
   }
+  console.log("PricePreview",pricePreview)
    if (!pricePreview) return null;
 
-   console.log("PricePreview",pricePreview)
 
   return (
     <div className="p-4 border rounded-lg bg-green-50">
