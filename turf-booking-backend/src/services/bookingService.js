@@ -41,17 +41,60 @@ export const getBookingsByTurfAndDate = async (turfId, date) => {
 //calculate Booking Price
 
 
-export const checkBookingConflict = async (turf_id, court_id, start_time, end_time) => {
-  const result = await pool.query(
-    `SELECT * FROM bookings 
-     WHERE turf_id = $1 
-       AND court_id = $2
-       AND status = 'confirmed'
-       AND ((start_time, end_time) OVERLAPS ($3, $4))`,
-    [turf_id, court_id, start_time, end_time]
+export const checkBookingConflict = async (
+  turf_id,
+  court_id,
+  start_time,
+  end_time
+) => {
+  // 1. Load the requested court
+  const { rows } = await pool.query(
+    `SELECT id, type, parent_court_id
+     FROM courts
+     WHERE id = $1 AND turf_id = $2`,
+    [court_id, turf_id]
   );
+
+  if (rows.length === 0) {
+    throw new Error("COURT_NOT_FOUND");
+  }
+
+  const court = rows[0];
+  const courtsToCheck = new Set();
+
+  // Always check itself
+  courtsToCheck.add(court.id);
+
+  // 2. Expand conflict scope
+  if (court.type === "FULL") {
+    // FULL → check all HALFs
+    const { rows: children } = await pool.query(
+      `SELECT id FROM courts WHERE parent_court_id = $1`,
+      [court.id]
+    );
+
+    children.forEach(c => courtsToCheck.add(c.id));
+  }
+
+  if (court.type === "HALF" && court.parent_court_id) {
+    // HALF → check its FULL
+    courtsToCheck.add(court.parent_court_id);
+  }
+
+  // 3. Check conflicts
+  const result = await pool.query(
+    `SELECT 1 FROM bookings
+     WHERE turf_id = $1
+       AND court_id = ANY($2)
+       AND status = 'confirmed'
+       AND (start_time, end_time) OVERLAPS ($3, $4)
+     LIMIT 1`,
+    [turf_id, Array.from(courtsToCheck), start_time, end_time]
+  );
+
   return result.rowCount > 0;
 };
+
 
 
 
@@ -80,27 +123,44 @@ console.log("platformFee",platformFee)
 
 }
 
-// Preview Price 
 export const previewBookingPriceService = async ({
   turf_id,
+  court_id,
   start_time,
   end_time,
 }) => {
+  // 1. Validate turf exists (ownership & safety)
   const turf = await getTurfById(turf_id);
   if (!turf) throw new Error("TURF_NOT_FOUND");
 
+  // 2. Fetch court
+  const court = await getCourtById(court_id);
+  if (!court) throw new Error("COURT_NOT_FOUND");
+
+  // 3. Ensure court belongs to turf
+  if (court.turf_id !== turf_id) {
+    throw new Error("COURT_TURF_MISMATCH");
+  }
+
+  // 4. Validate duration
   const { durationHours } = validateBookingDuration(
     new Date(start_time),
     new Date(end_time)
   );
 
+  // 5. Pricing (court-based)
+  const basePrice = Number(court.price) * durationHours;
+
+  // 6. Platform fee
   const platformFeePercent = await getPlatformFeePercent();
-  const basePrice = turf.price * durationHours;
+
+  // 7. Final breakdown
   return calculateBookingPrice({
     basePrice,
     platformFeePercent,
   });
 };
+
 
 
 export const cancelBookingService = async (bookingId, userId) => {
@@ -170,4 +230,70 @@ export const confirmBookingAfterPaymentService = async ({
     total_amount: price.totalAmount,
     admin_earning: price.adminEarning,
   });
+};
+
+export const getAvailableCourtsService = async ({
+  turf_id,
+  start_time,
+  end_time,
+}) => {
+  // 1. Fetch all courts
+  const { rows: courts } = await pool.query(
+    `SELECT id, name, type, price, parent_court_id
+     FROM courts
+     WHERE turf_id = $1`,
+    [turf_id]
+  );
+
+  // 2. Fetch overlapping confirmed bookings
+  const { rows: bookings } = await pool.query(
+    `SELECT court_id
+     FROM bookings
+     WHERE turf_id = $1
+       AND status = 'confirmed'
+       AND NOT (end_time <= $2 OR start_time >= $3)`,
+    [turf_id, start_time, end_time]
+  );
+
+  const bookedCourtIds = new Set(bookings.map(b => b.court_id));
+
+  // 3. Build lookup maps
+  const courtById = new Map();
+  const childrenByParent = new Map();
+
+  for (const court of courts) {
+    courtById.set(court.id, court);
+
+    if (court.parent_court_id) {
+      if (!childrenByParent.has(court.parent_court_id)) {
+        childrenByParent.set(court.parent_court_id, []);
+      }
+      childrenByParent.get(court.parent_court_id).push(court.id);
+    }
+  }
+
+  // 4. Expand blocked courts
+  const blockedCourtIds = new Set();
+
+  for (const courtId of bookedCourtIds) {
+    blockedCourtIds.add(courtId);
+
+    const court = courtById.get(courtId);
+
+    if (!court) continue;
+
+    // If FULL booked → block all HALFs
+    if (court.type === "FULL") {
+      const children = childrenByParent.get(court.id) || [];
+      children.forEach(id => blockedCourtIds.add(id));
+    }
+
+    // If HALF booked → block its FULL
+    if (court.type === "HALF" && court.parent_court_id) {
+      blockedCourtIds.add(court.parent_court_id);
+    }
+  }
+
+  // 5. Return available courts
+  return courts.filter(court => !blockedCourtIds.has(court.id));
 };
