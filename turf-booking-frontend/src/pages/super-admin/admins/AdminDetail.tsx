@@ -5,6 +5,14 @@ import {
 } from "../../../services/Turf";
 import { fetchAdmins } from "../../../features/admin/services";
 import { useEffect, useState } from "react";
+import CourtsTable from '../../../components/super-admin/CourtsTable';
+
+type Court = {
+  id?: string; // will come from backend later
+  name: string;
+  price: number;
+  status: "draft" | "saved";
+};
 
 interface AdminDetailProps {
   adminId: number;
@@ -56,6 +64,7 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
   const [adminTurfs, setAdminTurfs] = useState<Turf[]>([]);
   const [editingTurf, setEditingTurf] = useState<Turf | null>(null);
   const [showForm, setShowForm] = useState<boolean>(false); // 🔹 toggles form visibility
+  const [turfCourts, setTurfCourts] = useState<Court[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -176,6 +185,65 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
     setShowForm(true); // 🔹 show form when "Create" is clicked
   }
 
+  function handleAddCourt(){
+
+    const arr1=[1,2,3,4,5,[1,2,[2,[1]]],{a:2},true]
+     const ar=arr1
+    const newArr=[...arr1]
+    console.log("New arrr",newArr)
+    console.log(ar===arr1)
+
+    const obj1={name:"Sevin",get:"price"}
+
+    const obj2={...obj1}
+
+    console.log(obj2===obj1)
+    console.log(obj2)
+
+    const str="Check";
+    const d=[...str]
+    console.log(d)
+
+
+    setTurfCourts((prev)=>[
+      ...prev,
+      {
+        name:"",
+        price:0,
+        status:"draft",
+      }
+    ])
+  }
+
+  function handleSaveCourt(index: number) {
+    const court = turfCourts[index];
+
+    if (!court.name || !court.price) {
+      alert("Court name and price are required");
+      return;
+    }
+
+    // later: POST /courts → receive id
+    const updated = [...turfCourts];
+    updated[index] = {
+      ...court,
+      status: "saved",
+      // id: response.id (later)
+    };
+
+    setTurfCourts(updated);
+  }
+
+ function handleDeleteCourt(index: number) {
+    const court = turfCourts[index];
+
+    // later:
+    // if (court.id) call DELETE API
+
+    setTurfCourts(turfCourts.filter((_, i) => i !== index));
+  }
+  
+
   return (
     <>
       <button
@@ -282,15 +350,32 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
           </div>
 
           <div className="mb-4">
-            <label className="block mb-1 font-medium">Number of Courts</label>
-            <input
+            <label className="block mb-1 font-medium">Manage Courts</label>
+            {/* <input
               type="number"
               name="courts"
               value={formData.courts}
               onChange={handleChange}
               className="w-full border px-3 py-2 rounded"
               required
-            />
+            /> */}
+
+           <button
+              type="button"
+              onClick={handleAddCourt}
+              className="bg-green-500 text-white px-3 py-2 rounded"
+            >
+              ➕ Add Court
+            </button>
+
+            {
+              turfCourts.length>0 && <CourtsTable
+                  courts={turfCourts}
+                  onChange={setTurfCourts}
+                  onSave={handleSaveCourt}
+                  onDelete={handleDeleteCourt}
+                />
+            }
           </div>
           <div className="mb-4">
             <label className="block mb-1 font-medium">city</label>

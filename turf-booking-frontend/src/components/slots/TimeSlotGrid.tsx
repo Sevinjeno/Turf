@@ -175,7 +175,6 @@ const TimeSlotGrid: React.FC<TimeSlotGridProps> = ({
 
 
 const renderPreview = () => {
-  debugger
   if(priceLoading){
     return(
       <div className="p-4 border rounded-lg bg-gray-50 animate-pulse">
