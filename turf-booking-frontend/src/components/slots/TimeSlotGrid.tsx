@@ -1,13 +1,20 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import { previewBooking } from "../../services/Bookings/Index";
+import { useParams } from "react-router-dom";
 
 dayjs.extend(isSameOrBefore);
 
 interface Slot {
-  courtId: number;   // 👈 added court reference
+  courtId: number; // 👈 added court reference
   time: string;
   status: string;
+}
+interface PricePreview {
+  basePrice: number;
+  platformFee: number;
+  totalAmount: number;
 }
 
 interface TimeSlotGridProps {
@@ -17,7 +24,10 @@ interface TimeSlotGridProps {
   selectedDate: string;
   minDuration: number;
   handleBooking: () => void;
-  selectedCourt: number | null;  // 👈 new prop
+  selectedCourt: number | null; // 👈 new prop
+  pricePreview: PricePreview | null;
+   priceError:string | null;
+   priceLoading:boolean;
 }
 
 const TimeSlotGrid: React.FC<TimeSlotGridProps> = ({
@@ -28,9 +38,13 @@ const TimeSlotGrid: React.FC<TimeSlotGridProps> = ({
   minDuration,
   handleBooking,
   selectedCourt,
+  pricePreview,
+  priceLoading,
+  priceError
+
 }) => {
   const [activeTab, setActiveTab] = useState("Morning");
-
+  const { id } = useParams();
   const formatTime = (time: string) =>
     dayjs(`2000-01-01T${time}`).format("h:mm A");
 
@@ -72,7 +86,11 @@ const TimeSlotGrid: React.FC<TimeSlotGridProps> = ({
         alert("You can only book consecutive available slots!");
         return;
       }
-      setSelectedSlot({ start: selectedSlot.start, end: slot, courtId: selectedCourt });
+      setSelectedSlot({
+        start: selectedSlot.start,
+        end: slot,
+        courtId: selectedCourt,
+      });
     } else {
       setSelectedSlot({ start: slot, end: null, courtId: selectedCourt });
     }
@@ -108,7 +126,7 @@ const TimeSlotGrid: React.FC<TimeSlotGridProps> = ({
   }, [selectedSlot, minDuration]);
 
   // 👇 filter by court + time of day
-  
+
   const filteredSlots = useMemo(() => {
     return slots.filter((slot) => {
       if (selectedCourt && slot.courtId !== selectedCourt) return false;
@@ -120,6 +138,74 @@ const TimeSlotGrid: React.FC<TimeSlotGridProps> = ({
       return true;
     });
   }, [slots, activeTab, selectedCourt]);
+
+
+  // useEffect for PricePreview calling function to services here
+  // useEffect(() => {
+  //   const runPreview = async () => {
+  //     if (!selectedSlot?.start || !selectedSlot?.end) {
+  //       setPricePreview(null);
+  //       return;
+  //     }
+
+  //     const startTime = dayjs(
+  //       `${selectedDate}T${selectedSlot.start.time}`
+  //     ).toISOString();
+
+  //     const endTime = dayjs(
+  //       `${selectedDate}T${selectedSlot.end.time}`
+  //     ).toISOString();
+
+  //     try {
+  //       const preview = await previewBooking({
+  //         turf_id: id,
+  //         start_time: startTime,
+  //         end_time: endTime,
+  //         court_id: selectedCourt,
+  //       });
+
+  //       setPricePreview(preview);
+  //     } catch (err) {
+  //       setPricePreview(null);
+  //     }
+  //   };
+
+  //   runPreview();
+  // }, [selectedSlot, selectedDate, selectedCourt]);
+
+
+const renderPreview = () => {
+  if(priceLoading){
+    return(
+      <div className="p-4 border rounded-lg bg-gray-50 animate-pulse">
+        Calculating price…
+      </div>
+    )
+  }
+  if(priceError){
+    return(
+      <div className="mt-3 p-3 rounded-lg bg-red-100 border border-red-400">
+        <p className="text-sm text-red-700 font-medium">
+          ⚠️ {priceError}
+        </p>
+      </div>
+    )
+  }
+  console.log("PricePreview",pricePreview)
+   if (!pricePreview) return null;
+
+
+  return (
+    <div className="p-4 border rounded-lg bg-green-50">
+      <p className="text-sm text-gray-600">Price Breakdown</p>
+      <p>Base: ₹{pricePreview.basePrice}</p>
+      <p>Platform Fee: ₹{pricePreview.platformFee}</p>
+      <p className="font-bold text-lg">
+        Total: ₹{pricePreview.totalAmount}
+      </p>
+    </div>
+  );
+};
 
   return (
     <div className="flex flex-col md:flex-row gap-6 w-full px-4">
@@ -199,6 +285,9 @@ const TimeSlotGrid: React.FC<TimeSlotGridProps> = ({
             ⛔ Minimum playtime is {minDuration} minutes. Extend your game!
           </div>
         )}
+
+        {/* Preview Price  */}
+        {renderPreview()}
 
         <button
           disabled={!selectedDurationValid}

@@ -24,3 +24,18 @@ import { createPayment, getPaymentByBookingId } from '../models/paymentModel.js'
 //     const order = await razorpay.orders.create(options);
 //     return order;
 //   };
+
+export const createPaymentIntent = async ({
+  user_id,
+  amount,
+  metadata,
+}) => {
+  // Fake payment intent (Stripe-style)
+  return {
+    payment_intent_id: uuid(),
+    amount,
+    currency: "INR",
+    status: "CREATED",
+    metadata, // booking details stored safely
+  };
+};
