@@ -1,6 +1,6 @@
 
-import axios from "axios";
-import { API_URL } from "../api";
+
+import api from "../api";
 
 interface BookingPayload {
   turf_id: string | undefined ;
@@ -10,25 +10,20 @@ interface BookingPayload {
   court_id?:string | number | null
 }
 
+// CREATE BOOKING (protected)
 export const createBooking = async (data: BookingPayload) => {
-  try{
-    const response = await axios.post(`${API_URL}bookings`, data,{withCredentials:true});
-    return response.data;
-  }catch(err){
-  }
+  const response = await api.post("bookings/book", data);
+  return response.data;
 };
 
+// GET BOOKED SLOTS (public OR protected — interceptor safe)
 export const getBookedSlots = async (turfId: string | undefined, date: string) => {
-  const response = await axios.get(`${API_URL}bookings?turfId=${turfId}&date=${date}`);
-  return response.data; // [{ start_time, end_time }]
+  const response = await api.get(`bookings?turfId=${turfId}&date=${date}`);
+  return response.data;
 };
 
-export const previewBooking = async(data:BookingPayload)=>{
-  try{
-    const response = await axios.post(`${API_URL}bookings/preview`, data,{withCredentials:true});
-     return response.data;
-  } catch(err){
-
-  }
-
-}
+// PREVIEW BOOKING (protected)
+export const previewBooking = async (data: BookingPayload) => {
+  const response = await api.post("bookings/preview", data);
+  return response.data;
+};

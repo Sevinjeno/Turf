@@ -24,7 +24,7 @@ interface TimeSlotGridProps {
   selectedDate: string;
   minDuration: number;
   handleBooking: () => void;
-  selectedCourt: number | null; // 👈 new prop
+  selectedCourt: string | null; // 👈 new prop
   pricePreview: PricePreview | null;
    priceError:string | null;
    priceLoading:boolean;
@@ -129,7 +129,7 @@ const TimeSlotGrid: React.FC<TimeSlotGridProps> = ({
 
   const filteredSlots = useMemo(() => {
     return slots.filter((slot) => {
-      if (selectedCourt && slot.courtId !== selectedCourt) return false;
+      // if (selectedCourt && slot.courtId !== Number(selectedCourt)) return false;
 
       const hour = dayjs(`2000-01-01T${slot.time}`).hour();
       if (activeTab === "Morning") return hour >= 5 && hour < 12;
@@ -191,8 +191,10 @@ const renderPreview = () => {
       </div>
     )
   }
+  console.log("selectedCourt",selectedCourt)
+  if(!selectedCourt) return <div>Please Select Court</div>
   console.log("PricePreview",pricePreview)
-   if (!pricePreview) return null;
+   if (!pricePreview) return <div>No Preview for this Court </div>;
 
 
   return (
@@ -290,10 +292,10 @@ const renderPreview = () => {
         {renderPreview()}
 
         <button
-          disabled={!selectedDurationValid}
+          disabled={!selectedDurationValid && !selectedCourt}
           className={`mt-2 px-6 py-2 rounded-lg text-white font-semibold transition
             ${
-              selectedDurationValid
+              selectedDurationValid  && selectedCourt   
                 ? "bg-green-600 hover:bg-green-700"
                 : "bg-gray-400 cursor-not-allowed"
             }

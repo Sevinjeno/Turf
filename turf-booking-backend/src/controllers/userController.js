@@ -35,11 +35,11 @@ export const createUserController = async (req, res) => {
         const user_token = generateAccessToken(User);
 
         // Send the JWT token to the client (stored in an HTTPOnly cookie for security)
-        res.cookie("user_token", user_token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "Strict",
-        });
+        // res.cookie("user_token", user_token, {
+        //   httpOnly: true,
+        //   secure: process.env.NODE_ENV === "production",
+        //   sameSite: "Strict",
+        // });
 
         // Respond with success
         res
@@ -61,11 +61,11 @@ export const createUserController = async (req, res) => {
       const user_token = generateAccessToken(User);
 
       // Send the JWT token to the client (stored in an HTTPOnly cookie for security)
-      res.cookie("user_token", user_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "Strict",
-      });
+      // res.cookie("user_token", user_token, {
+      //   httpOnly: true,
+      //   secure: process.env.NODE_ENV === "production",
+      //   sameSite: "Strict",
+      // });
 
       if (action == "register") {
         // Respond with success message and user data (existing user)
@@ -89,11 +89,11 @@ export const createUserController = async (req, res) => {
       const user_token = generateAccessToken(User);
 
       // Send the JWT token to the client (stored in an HTTPOnly cookie for security)
-      res.cookie("user_token", user_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "Strict",
-      });
+      // res.cookie("user_token", user_token, {
+      //   httpOnly: true,
+      //   secure: process.env.NODE_ENV === "production",
+      //   sameSite: "Strict",
+      // });
 
       // Respond with success message and user data (existing user)
       return res.status(200).json({
@@ -134,11 +134,11 @@ export const registerUserController = async (req, res) => {
     const user_token = generateAccessToken(newUser);
 
     // Send the token in an HTTPOnly cookie
-    res.cookie("user_token", user_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-    });
+    // res.cookie("user_token", user_token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: "Strict",
+    // });
 
     return res
       .status(201)
