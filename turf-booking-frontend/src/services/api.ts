@@ -3,7 +3,6 @@ import axios from "axios";
 import store from "../store";
 import { setAccessToken, logout } from "../features/auth/authSlice";
 export const API_URL = "http://localhost:3000/api/";
-
 const api = axios.create({
   baseURL: "http://localhost:3000/api/", // backend URL
   headers: {
@@ -20,9 +19,20 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(async (config) => {
+  // ⛔ Block requests while refresh is in progress
+  if (isRefreshing) {
+    await new Promise<string>((resolve, reject) => {
+      failedQueue.push({ resolve, reject });
+    });
+  }
+
   const token = store.getState().auth.accessToken;
-  if (token && config.headers) config.headers["Authorization"] = `Bearer ${token}`;
+
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
   return config;
 });
 

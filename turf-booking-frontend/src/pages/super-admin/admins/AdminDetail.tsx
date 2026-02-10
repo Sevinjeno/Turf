@@ -5,7 +5,7 @@ import {
 } from "../../../services/Turf";
 import { fetchAdmins } from "../../../features/admin/services";
 import { useEffect, useState } from "react";
-import CourtsTable from '../../../components/super-admin/CourtsTable';
+import CourtsTable from "../../../components/super-admin/CourtsTable";
 
 type Court = {
   id?: string; // will come from backend later
@@ -187,23 +187,13 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
 
   function handleAddCourt(){
 
-    const arr1=[1,2,3,4,5,[1,2,[2,[1]]],{a:2},true]
-     const ar=arr1
-    const newArr=[...arr1]
-    console.log("New arrr",newArr)
-    console.log(ar===arr1)
+     const arr = [10, 20, 30, 40];
+      const newValue=21
+      const up=arr.map((e,i)=>(
+        i==1?e:e
+      ))
 
-    const obj1={name:"Sevin",get:"price"}
-
-    const obj2={...obj1}
-
-    console.log(obj2===obj1)
-    console.log(obj2)
-
-    const str="Check";
-    const d=[...str]
-    console.log(d)
-
+      console.log(up)
 
     setTurfCourts((prev)=>[
       ...prev,
@@ -242,7 +232,6 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
 
     setTurfCourts(turfCourts.filter((_, i) => i !== index));
   }
-  
 
   return (
     <>
@@ -459,4 +448,57 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
   );
 };
 
-export default AdminDetail;
+
+
+
+
+
+
+
+// const AdminDetail = () => {
+//   console.log("Admin Detail");
+
+
+//   // we will work on arrays and render different types
+
+//   const array1 = [10, 20, 30, 40, 50];
+
+//   const array2 = [11, 22, 33, [44, 11, [22]], 55];
+
+//   const array3 = ["Heyy", "Sevinjeno", "Fernando"];
+
+//   const array4 = [
+//     { name: "sevinjeno", age: 28, nested: { lastname: "Fernando" } },
+//     { name: "sevin", age: 28, nested: { lastname: "Fernando" } },
+//     { name: "jeno", age: 28, nested: { lastname: "Fernando" } },
+//     { name: "7jeno", age: 28, nested: { lastname: "Fernando" } },
+//   ];
+
+
+//   const [count,setCount]=useState<number>(0)
+
+//   useEffect(()=>{
+// console.log("count",count)
+
+//  return ()=>{console.log("cleanup")}
+//   },[count])
+//   // function flatten(arr){
+//       //  Array.isArray(arr)
+//   // }
+
+//   return (
+//     <>
+//     <button onClick={()=>setCount(count+1)} >Check</button>
+//       <OnlyToPresent />
+//     </>
+//   );
+// };
+
+
+// export function OnlyToPresent() {
+  //   console.log("OnlyToPresent");
+  
+  //   return <>{/* <input type="text" value={""} /> */}</>;
+  // }
+  
+  export default AdminDetail;

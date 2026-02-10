@@ -29,7 +29,7 @@ export const insertBooking = async ({
   base_price,
   admin_earning,
   platform_earning,
-  total_amount
+  total_price
 }) => {
   const query = `
     INSERT INTO bookings (
@@ -43,7 +43,7 @@ export const insertBooking = async ({
       base_price,
       admin_earning,
       platform_earning,
-      total_amount
+      total_price
     )
     VALUES ($1,$2,$3,$4,$5,$6,'confirmed',$7,$8,$9,$10)
     RETURNING *;
@@ -59,7 +59,7 @@ export const insertBooking = async ({
     base_price,
     admin_earning,
     platform_earning,
-    total_amount
+    total_price
   ];
 
   const { rows } = await pool.query(query, values);

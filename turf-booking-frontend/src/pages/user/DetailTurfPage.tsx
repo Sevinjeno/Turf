@@ -3,14 +3,19 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import DateSelector from "../../components/slots/DateSelector";
 import TimeSlotGrid from "../../components/slots/TimeSlotGrid";
-import dayjs ,{Dayjs} from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { fetchTurfSlots } from "../../services/Slots/index";
-import { createBooking, getBookedSlots, previewBooking } from "../../services/Bookings/Index";
+import {
+  createBooking,
+  getBookedSlots,
+  previewBooking,
+} from "../../services/Bookings/Index";
 import { RootState, useAppDispatch } from "../../store";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { getCourtsbyTurfId } from "../../services/Courts/index";
 import CourtDropdown from "../../components/user/CourtsDropdown";
+import { useSelector } from "react-redux";
 interface Turf {
   id: number;
   name: string;
@@ -39,7 +44,7 @@ function DetailTurfPage() {
   const { id } = useParams(); // turf id
   const [turf, setTurf] = useState<Turf | null>(null);
   const [selectedDate, setSelectedDate] = useState(
-    dayjs().format("YYYY-MM-DD")
+    dayjs().format("YYYY-MM-DD"),
   );
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
   const [slots, setSlots] = useState([]);
@@ -47,69 +52,74 @@ function DetailTurfPage() {
   const dispatch = useAppDispatch();
   const [courts, setCourts] = useState<any[]>([]);
   const [selectedCourt, setSelectedCourt] = useState<string>("");
-  let user = {name:"",id:"",email:""};
+  let user = { name: "", id: "", email: "" };
 
-const [pricePreview, setPricePreview] = useState<null | {
-  basePrice: number;
-  platformFee: number;
-  totalAmount: number;
-}>(null);
+  const [pricePreview, setPricePreview] = useState<null | {
+    basePrice: number;
+    platformFee: number;
+    totalAmount: number;
+  }>(null);
 
-const [priceLoading, setPriceLoading] = useState(false);
-const [priceError, setPriceError] = useState<string | null>(null);
-  
+  const [priceLoading, setPriceLoading] = useState(false);
+  const [priceError, setPriceError] = useState<string | null>(null);
 
-useEffect(() => {
-  const runPreview = async () => {
-    if (!selectedSlot?.start || !selectedSlot?.end || !id) {
-      setPricePreview(null);
-      return;
-    }
+  const accessToken = useSelector(
+  (state: RootState) => state.auth.accessToken
+);
 
-    try {
-      setPriceLoading(true);
-      setPriceError(null);
+  useEffect(() => {
+    const runPreview = async () => {
+      if (!selectedSlot?.start || !selectedSlot?.end || !id) {
+        setPricePreview(null);
+        return;
+      }
 
-      const startTime = dayjs(
-        `${selectedDate}T${selectedSlot.start.time}`
-      ).toISOString();
+      try {
+        setPriceLoading(true);
+        setPriceError(null);
 
-      const endTime = dayjs(
-        `${selectedDate}T${selectedSlot.end.time}`
-      ).toISOString();
- 
-const start: Dayjs = dayjs(startTime);
-const end: Dayjs = dayjs(endTime);
+        const startTime = dayjs(
+          `${selectedDate}T${selectedSlot.start.time}`,
+        ).toISOString();
 
-// Difference in minutes
-const durationMinutes: number = end.diff(start, "minute");
+        const endTime = dayjs(
+          `${selectedDate}T${selectedSlot.end.time}`,
+        ).toISOString();
 
-    if (durationMinutes < 60) {
-      setPricePreview(null);
-      return;
-    }
+        const start: Dayjs = dayjs(startTime);
+        const end: Dayjs = dayjs(endTime);
 
-      const result = await await previewBooking(
-        {
+        // Difference in minutes
+        const durationMinutes: number = end.diff(start, "minute");
+
+        if (durationMinutes < 60) {
+          setPricePreview(null);
+          return;
+        }
+
+        if(!selectedCourt) return;
+        
+
+        console.log("selectedCourt",selectedCourt)
+
+        const result = await await previewBooking({
           turf_id: id,
           start_time: startTime,
           end_time: endTime,
           court_id: selectedCourt || null,
-        }
-      );
+        });
 
-      setPricePreview(result);
-    } catch (err: any) {
-      setPricePreview(null);
-      setPriceError("Unable to calculate price");
-    } finally {
-      setPriceLoading(false);
-    }
-  };
+        setPricePreview(result);
+      } catch (err: any) {
+        setPricePreview(null);
+        setPriceError("Unable to calculate price");
+      } finally {
+        setPriceLoading(false);
+      }
+    };
 
-  runPreview();
-}, [selectedSlot, selectedDate, selectedCourt, id]);
-
+    runPreview();
+  }, [selectedSlot, selectedDate, selectedCourt, id]);
 
   // Fetch courts for the turf
 
@@ -118,7 +128,7 @@ const durationMinutes: number = end.diff(start, "minute");
     const fetchTurfDetails = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/api/turfs/${id}`
+          `http://localhost:3000/api/turfs/${id}`,
         );
         setTurf(response.data);
       } catch (err) {
@@ -127,7 +137,7 @@ const durationMinutes: number = end.diff(start, "minute");
     };
 
     const fetchCourts = async () => {
-      console.log("Inside courts")
+      console.log("Inside courts");
       try {
         const courtsData = await getCourtsbyTurfId(id || "");
         setCourts(courtsData);
@@ -154,39 +164,39 @@ const durationMinutes: number = end.diff(start, "minute");
   }, [selectedDate]);
 
   const handleBooking = async () => {
-  if (!selectedSlot?.start || !selectedSlot?.end) {
+console.log("handleBooking access",accessToken)
+    if (!accessToken) {
+      console.log("accessToken",accessToken)
+    console.error("Auth not ready yet");
+    return;
+  }
+
+    if (!selectedSlot?.start || !selectedSlot?.end) {
       console.error("Please select a valid slot range");
       return;
     }
     try {
       const startTime = dayjs(
-        `${selectedDate}T${selectedSlot.start?.time}`
+        `${selectedDate}T${selectedSlot.start?.time}`,
       ).toISOString();
       const endTime = dayjs(
-        `${selectedDate}T${selectedSlot.end?.time}`
+        `${selectedDate}T${selectedSlot.end?.time}`,
       ).toISOString();
       const bookingData = {
         turf_id: id, // Replace with actual turfId
         start_time: startTime, // Use correct datetime format
         end_time: endTime,
-        slot_id: null, // Optional, can be null or the slot id
         // court_id: selectedCourt || 1, // Use selected court
         court_id: selectedCourt, // Use selected court
       };
-      // const result = await previewBooking(bookingData);
+      const result = await createBooking(bookingData);
       setSelectedSlot({ start: null, end: null });
       await loadSlots(); // Reload slots after booking
-      // console.log("Booking Success:", result);
+      console.log("Booking Success:", result);
     } catch (error: any) {
       console.error("Booking failed:", error.response?.data || error.message);
     }
   };
-
-
-
-
-
-
 
   return (
     <div className="min-h-screen bg-indigo-50 p-4 sm:p-6 md:p-8">
@@ -232,7 +242,7 @@ const durationMinutes: number = end.diff(start, "minute");
             selectedCourt={selectedCourt}
             setSelectedCourt={setSelectedCourt}
           />
-
+          {/* Main Login for preview, time , booking handling  */}
           {/* Time Slots */}
           <div className="bg-white shadow-md rounded-xl p-4 sm:p-6">
             <TimeSlotGrid
@@ -243,9 +253,9 @@ const durationMinutes: number = end.diff(start, "minute");
               minDuration={minBookingDuration}
               handleBooking={handleBooking}
               pricePreview={pricePreview}
-               priceLoading={priceLoading}
-               priceError={priceError}
-
+              priceLoading={priceLoading}
+              priceError={priceError}
+              selectedCourt={selectedCourt}
             />
           </div>
         </div>

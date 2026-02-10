@@ -59,12 +59,18 @@ export const verifyEmailOtpController = async (req, res) => {
       path: "/",
     });
 
-    res.cookie("user_token", accessToken, {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax", // Strict blocks cookies between 5173 → 3000
-    path: "/",
-  });
+  //   res.jso("user_token", accessToken, {
+  //   httpOnly: true,
+  //   secure: false,
+  //   sameSite: "lax", // Strict blocks cookies between 5173 → 3000
+  //   path: "/",
+  // });
+  res.clearCookie("user_token", {
+  httpOnly: true,
+  secure: false,
+  sameSite: "lax",
+  path: "/",
+});
 
     return res.status(200).json({ message: "Email verified successfully",accessToken,user:{id:user.id,email:user.email,phone:user.phone,name:user.name} });
   } catch (err) {

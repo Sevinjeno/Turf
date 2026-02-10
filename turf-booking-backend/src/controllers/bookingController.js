@@ -1,31 +1,19 @@
-import { checkBookingConflict,  getBookingsByTurfAndDate, previewBookingPriceService, } from '../services/bookingService.js';
+import { checkBookingConflict,  confirmBookingService,  getBookingsByTurfAndDate, previewBookingPriceService, } from '../services/bookingService.js';
 
 /**
  * Controller to create a booking.
  */
-// export const createBookingController = async (req, res) => {
-//   try {
-//     const { turf_id, court_id, start_time, end_time } = req.body;
-//     const user_id = req.user.id;
-
-//     const booking = await createBookingService({
-//       user_id,
-//       turf_id,
-//       court_id,
-//       start_time,
-//       end_time
-//     });
-
-//     res.status(201).json(booking);
-//   } catch (err) {
-//     if (err.message === "SLOT_CONFLICT") {
-//       return res.status(409).json({ error: "Slot already booked" });
-//     }
-
-//     console.error(err);
-//     res.status(500).json({ error: "Server error" });
-//   }
-// };
+export const createBookingController = async (req, res) => {
+  try {
+    console.log("confirmBookingService Rqest ",req.body)
+    const booking = await confirmBookingService(req.body);
+    console.log("booking",booking)
+    res.json(booking);
+  } catch (err) {
+    console.log("I error ",err)
+    res.status(400).json({ error: err.message });
+  }
+};
 
 // export const getBookingsController = async (req, res) => {
 //    const { turfId, date } = req.query;

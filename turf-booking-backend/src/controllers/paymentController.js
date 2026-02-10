@@ -1,4 +1,4 @@
-import { confirmBookingAfterPaymentService } from '../services/bookingService.js';
+// import { confirmBookingAfterPaymentService } from '../services/bookingService.js';
 import * as paymentService from '../services/paymentService.js';
 
 // Process a new payment
@@ -73,21 +73,21 @@ export const createPaymentIntentController = async (req, res) => {
 };
 
 
-export const paymentWebhookController = async (req, res) => {
-  const { status, payment_id, metadata } = req.body;
+// export const paymentWebhookController = async (req, res) => {
+//   const { status, payment_id, metadata } = req.body;
 
-  if (status !== "SUCCESS") {
-    return res.sendStatus(200);
-  }
+//   if (status !== "SUCCESS") {
+//     return res.sendStatus(200);
+//   }
 
-  await confirmBookingAfterPaymentService({
-    user_id: metadata.user_id,
-    turf_id: metadata.turf_id,
-    court_id: metadata.court_id,
-    start_time: metadata.start_time,
-    end_time: metadata.end_time,
-    payment_id,
-  });
+//   await confirmBookingAfterPaymentService({
+//     user_id: metadata.user_id,
+//     turf_id: metadata.turf_id,
+//     court_id: metadata.court_id,
+//     start_time: metadata.start_time,
+//     end_time: metadata.end_time,
+//     payment_id,
+//   });
 
-  res.send("OK");
-};
+//   res.send("OK");
+// };
