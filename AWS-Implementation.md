@@ -7,6 +7,8 @@ Our turf app will use three AWS layers:
 
 Frontend Hosting
 
+
+
     React build → stored in S3 (Simple Storage Service)
 
     Distributed globally through CloudFront (CDN) for fast delivery
