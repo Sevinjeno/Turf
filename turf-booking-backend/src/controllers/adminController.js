@@ -42,6 +42,7 @@ export const getAdminByIdController = async (req, res) => {
     }
     res.status(200).json({ data: [admin] });
   } catch (error) {
+    console.log("Admin error",error)
     res
       .status(500)
       .json({ message: "Failed to fetch admin", error: error.message });

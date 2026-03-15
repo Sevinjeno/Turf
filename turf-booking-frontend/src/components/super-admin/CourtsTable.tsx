@@ -3,6 +3,7 @@ type Court = {
   name: string;
   price: number;
   status: "draft" | "saved";
+  type?:string;
 };
 
 interface Props {
@@ -15,7 +16,7 @@ interface Props {
 const CourtsTable = ({ courts, onChange, onSave, onDelete }: Props) => {
   const updateCourt = (
     index: number,
-    key: "name" | "price",
+    key: "name" | "price" |"type",
     value: string | number
   ) => {
     const updated = [...courts];
@@ -27,6 +28,9 @@ const CourtsTable = ({ courts, onChange, onSave, onDelete }: Props) => {
     if (key === "price" && typeof value === "number") {
       updated[index].price = value;
     }
+    if (key === "type" && typeof value === "string") {
+      updated[index].type = value;
+    }
 
     onChange(updated);
   };
@@ -37,6 +41,7 @@ const CourtsTable = ({ courts, onChange, onSave, onDelete }: Props) => {
         <tr>
           <th className="p-2 border">Court Name</th>
           <th className="p-2 border">Price</th>
+          <th className="p-2 border">type</th>
           <th className="p-2 border">Actions</th>
         </tr>
       </thead>
@@ -63,6 +68,19 @@ const CourtsTable = ({ courts, onChange, onSave, onDelete }: Props) => {
                 disabled={court.status === "saved"}
                 onChange={(e) =>
                   updateCourt(index, "price", Number(e.target.value))
+                }
+                className="w-full border px-2 py-1 rounded disabled:bg-gray-100"
+              />
+            </td>
+
+            
+            <td className="p-2 border">
+              <input
+                type="text"
+                value={court.type}
+                disabled={court.status === "saved"}
+                onChange={(e) =>
+                  updateCourt(index, "type", e.target.value)
                 }
                 className="w-full border px-2 py-1 rounded disabled:bg-gray-100"
               />

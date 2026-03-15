@@ -116,8 +116,6 @@ export const getTurfsByAdminId = async (adminId) => {
       ST_Y(location::geometry) AS latitude,
       start_time,
       end_time,
-      price,
-      courts,
       city
     FROM turfs
     WHERE admin_id = $1;
@@ -133,8 +131,6 @@ export const updateTurfInDB = async (
   lon,
   startTime,
   endTime,
-  price,
-  courts,
   city
 ) => {
   const client = await pool.connect();
@@ -150,10 +146,8 @@ export const updateTurfInDB = async (
         location = ST_SetSRID(ST_Point($2, $3), 4326),
         start_time = $4,
         end_time = $5,
-        price = $6,
-        courts = $7,
-        city = $8
-      WHERE id = $9
+        city = $6
+      WHERE id = $7
       RETURNING *;
     `;
 
@@ -163,7 +157,6 @@ export const updateTurfInDB = async (
       lat,
       startTime,
       endTime,
-      price,
       courts,
       city,
       id,
