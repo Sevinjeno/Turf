@@ -1,4 +1,4 @@
-import { createPayment, getPaymentByBookingId } from '../models/paymentModel.js';
+// import { createPayment, getPaymentByBookingId } from '../models/paymentModel.js';
 
 // const razorpay = new Razorpay({
 //     key_id: process.env.RAZORPAY_KEY_ID,
@@ -13,6 +13,13 @@ import { createPayment, getPaymentByBookingId } from '../models/paymentModel.js'
 //     return await getPaymentByBookingId(bookingId);
 // };
 
+// export const createRazorpayOrder = async (amount, receiptId) => {
+//     const options = {
+//       amount: amount * 100, // Razorpay expects amount in paise
+//       currency: 'INR',
+//       receipt: receiptId,
+//       payment_capture: 1,
+//     };
 // export const createRazorpayOrder = async (amount, receiptId) => {
 //     const options = {
 //       amount: amount * 100, // Razorpay expects amount in paise
