@@ -5,6 +5,14 @@ import {
 } from "../../../services/Turf";
 import { fetchAdmins } from "../../../features/admin/services";
 import { useEffect, useState } from "react";
+import CourtsTable from "../../../components/super-admin/CourtsTable";
+
+type Court = {
+  id?: string; // will come from backend later
+  name: string;
+  price: number;
+  status: "draft" | "saved";
+};
 
 interface AdminDetailProps {
   adminId: number;
@@ -14,8 +22,8 @@ interface AdminDetailProps {
 type Turf = {
   id: number;
   name: string;
-  lat: number;
-  lon: number;
+  latitude: number;
+  longitude: number;
   admin_id: number;
   location: string;
   price: number;
@@ -28,8 +36,8 @@ type Turf = {
 
 type TurfFormData = {
   name: string;
-  lat: number;
-  lon: number;
+  latitude: number;
+  longitude: number;
   adminId: number;
   startTime: string;
   endTime: string;
@@ -42,8 +50,8 @@ type TurfFormData = {
 const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
   const [formData, setFormData] = useState<TurfFormData>({
     name: "",
-    lat: 0,
-    lon: 0,
+    latitude: 0,
+    longitude: 0,
     adminId: adminId,
     startTime: "",
     endTime: "",
@@ -56,11 +64,12 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
   const [adminTurfs, setAdminTurfs] = useState<Turf[]>([]);
   const [editingTurf, setEditingTurf] = useState<Turf | null>(null);
   const [showForm, setShowForm] = useState<boolean>(false); // 🔹 toggles form visibility
+  const [turfCourts, setTurfCourts] = useState<Court[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        await fetchAdmins(adminId); // optional: display admin info if needed
+        await fetchAdmins(); // optional: display admin info if needed
         const turfResponse = await fetchTurfsByAdminId(adminId);
         setAdminTurfs(turfResponse);
       } catch (err) {
@@ -75,8 +84,8 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
     if (editingTurf) {
       setFormData({
         name: editingTurf.name,
-        lat: editingTurf.lat,
-        lon: editingTurf.lon,
+        latitude: editingTurf.latitude,
+        longitude: editingTurf.longitude,
         adminId: editingTurf.admin_id,
         startTime: editingTurf.start_time,
         endTime: editingTurf.end_time,
@@ -94,7 +103,7 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
 
     const turfData = {
       name: formData.name,
-      location: { lat: formData.lat, lon: formData.lon },
+      location: { lat: formData.latitude, lon: formData.longitude },
       adminId: formData.adminId,
       imageUrl: formData.imageUrl,
       startTime: formData.startTime,
@@ -107,12 +116,11 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
     try {
       if (editingTurf) {
         await updateTurf(editingTurf.id, turfData);
-        console.log("Turf updated");
       } else {
         const form = new FormData();
         form.append("name", formData.name);
-        form.append("lat", formData.lat.toString());
-        form.append("lon", formData.lon.toString());
+        form.append("latitude", formData.latitude.toString());
+        form.append("longitude", formData.longitude.toString());
         form.append("courts", formData.courts.toString());
         form.append("price", formData.price.toString());
         form.append("startTime", formData.startTime);
@@ -120,14 +128,13 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
         form.append("adminId", formData.adminId.toString());
         if (formData.imageUrl) form.append("image", formData.imageUrl);
         await createTurf(form);
-        console.log("Turf created");
       }
 
       // Reset form
       setFormData({
         name: "",
-        lat: 0,
-        lon: 0,
+        latitude: 0,
+        longitude: 0,
         adminId: adminId,
         imageUrl: null,
         startTime: "",
@@ -165,8 +172,8 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
     setEditingTurf(null);
     setFormData({
       name: "",
-      lat: 0,
-      lon: 0,
+      latitude: 0,
+      longitude: 0,
       adminId: adminId,
       imageUrl: null,
       startTime: "",
@@ -176,6 +183,54 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
       city  : "",
     });
     setShowForm(true); // 🔹 show form when "Create" is clicked
+  }
+
+  function handleAddCourt(){
+
+     const arr = [10, 20, 30, 40];
+      const newValue=21
+      const up=arr.map((e,i)=>(
+        i==1?e:e
+      ))
+
+      console.log(up)
+
+    setTurfCourts((prev)=>[
+      ...prev,
+      {
+        name:"",
+        price:0,
+        status:"draft",
+      }
+    ])
+  }
+
+  function handleSaveCourt(index: number) {
+    const court = turfCourts[index];
+
+    if (!court.name || !court.price) {
+      alert("Court name and price are required");
+      return;
+    }
+
+    // later: POST /courts → receive id
+    const updated = [...turfCourts];
+    updated[index] = {
+      ...court,
+      status: "saved",
+      // id: response.id (later)
+    };
+
+    setTurfCourts(updated);
+  }
+
+ function handleDeleteCourt(index: number) {
+    const court = turfCourts[index];
+
+    // later:
+    // if (court.id) call DELETE API
+
+    setTurfCourts(turfCourts.filter((_, i) => i !== index));
   }
 
   return (
@@ -199,8 +254,8 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
           <thead>
             <tr className="bg-gray-100">
               <th className="p-2 border">Name</th>
-              <th className="p-2 border">Lat</th>
-              <th className="p-2 border">Lon</th>
+              <th className="p-2 border">Latitude</th>
+              <th className="p-2 border">Longitude</th>
               <th className="p-2 border">Price (₹)</th>
               <th className="p-2 border">Time</th>
               <th className="p-2 border">Actions</th>
@@ -210,8 +265,8 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
             {adminTurfs.map((turf) => (
               <tr key={turf.id}>
                 <td className="p-2 border">{turf.name}</td>
-                <td className="p-2 border">{turf.lat}</td>
-                <td className="p-2 border">{turf.lon}</td>
+                <td className="p-2 border">{turf.latitude}</td>
+                <td className="p-2 border">{turf.longitude}</td>
                 <td className="p-2 border">{turf.price}</td>
                 <td className="p-2 border">
                   {turf.start_time} - {turf.end_time}
@@ -263,8 +318,8 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
             <label className="block mb-1 font-medium">Latitude</label>
             <input
               type="number"
-              name="lat"
-              value={formData.lat}
+              name="latitude"
+              value={formData.latitude}
               onChange={handleChange}
               className="w-full border px-3 py-2 rounded"
               required
@@ -275,8 +330,8 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
             <label className="block mb-1 font-medium">Longitude</label>
             <input
               type="number"
-              name="lon"
-              value={formData.lon}
+              name="longitude"
+              value={formData.longitude}
               onChange={handleChange}
               className="w-full border px-3 py-2 rounded"
               required
@@ -284,15 +339,32 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
           </div>
 
           <div className="mb-4">
-            <label className="block mb-1 font-medium">Number of Courts</label>
-            <input
+            <label className="block mb-1 font-medium">Manage Courts</label>
+            {/* <input
               type="number"
               name="courts"
               value={formData.courts}
               onChange={handleChange}
               className="w-full border px-3 py-2 rounded"
               required
-            />
+            /> */}
+
+           <button
+              type="button"
+              onClick={handleAddCourt}
+              className="bg-green-500 text-white px-3 py-2 rounded"
+            >
+              ➕ Add Court
+            </button>
+
+            {
+              turfCourts.length>0 && <CourtsTable
+                  courts={turfCourts}
+                  onChange={setTurfCourts}
+                  onSave={handleSaveCourt}
+                  onDelete={handleDeleteCourt}
+                />
+            }
           </div>
           <div className="mb-4">
             <label className="block mb-1 font-medium">city</label>
@@ -376,4 +448,57 @@ const AdminDetail: React.FC<AdminDetailProps> = ({ adminId, onBack }) => {
   );
 };
 
-export default AdminDetail;
+
+
+
+
+
+
+
+// const AdminDetail = () => {
+//   console.log("Admin Detail");
+
+
+//   // we will work on arrays and render different types
+
+//   const array1 = [10, 20, 30, 40, 50];
+
+//   const array2 = [11, 22, 33, [44, 11, [22]], 55];
+
+//   const array3 = ["Heyy", "Sevinjeno", "Fernando"];
+
+//   const array4 = [
+//     { name: "sevinjeno", age: 28, nested: { lastname: "Fernando" } },
+//     { name: "sevin", age: 28, nested: { lastname: "Fernando" } },
+//     { name: "jeno", age: 28, nested: { lastname: "Fernando" } },
+//     { name: "7jeno", age: 28, nested: { lastname: "Fernando" } },
+//   ];
+
+
+//   const [count,setCount]=useState<number>(0)
+
+//   useEffect(()=>{
+// console.log("count",count)
+
+//  return ()=>{console.log("cleanup")}
+//   },[count])
+//   // function flatten(arr){
+//       //  Array.isArray(arr)
+//   // }
+
+//   return (
+//     <>
+//     <button onClick={()=>setCount(count+1)} >Check</button>
+//       <OnlyToPresent />
+//     </>
+//   );
+// };
+
+
+// export function OnlyToPresent() {
+  //   console.log("OnlyToPresent");
+  
+  //   return <>{/* <input type="text" value={""} /> */}</>;
+  // }
+  
+  export default AdminDetail;

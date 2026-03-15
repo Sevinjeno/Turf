@@ -13,8 +13,12 @@ import courtRoutes from "./routes/courtRoutes.js";
 import cors from 'cors'; 
 import passport from 'passport';
 import authRoutes from "./routes/authRoutes.js"
+import checkRoutes from "./routes/checkRoutes.js"
 import "./configs/passport.js"
 import cookieParser from 'cookie-parser';
+import { errorHandler } from './middlewares/errorHandler.js';
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./swagger.js";
 const app = express();
 
 // Enable CORS for your frontend's origin
@@ -48,19 +52,25 @@ app.use(passport.session());
 
 
 // Use routes
+app.use("/api/auth", authRoutes);
 app.use('/api/users', userRoutes); 
 app.use('/api/admins', adminRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/turfs', turfRoutes);
 app.use("/api/courts", courtRoutes);
+app.use('/api/check',checkRoutes) // for checking purpose
 //Image
 app.use("/uploads", express.static("uploads"));
 
 // Super Admin Routes
 app.use('/api/superadmin', superAdminRoutes);
-app.use("/auth", authRoutes);
 app.use('/api/slots',slotRoutes);
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+//error handling 
+app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 3000;

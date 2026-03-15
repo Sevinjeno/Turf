@@ -1,4 +1,3 @@
-import Input from '../../custom-components/Input';
 import axios from 'axios';
 import React, { useState } from 'react'
 import { Link, Outlet, useNavigate } from 'react-router-dom';
@@ -42,7 +41,7 @@ function SuperAdminLogin({}: Props) {
         <form className=' flex flex-col gap-3 bg-white p-6 min-h-[150px] rounded-xl drop-shadow-xl' onSubmit={handleLogin}>
                 <div>
                     <label>Username</label>
-                    <Input
+                    <input
                     name='text'
                         type="text"
                         value={username}
@@ -51,7 +50,7 @@ function SuperAdminLogin({}: Props) {
                 </div>
                 <div>
                     <label>Password</label>
-                    <Input
+                    <input
                     name='password'
                         type="password"
                         value={password}

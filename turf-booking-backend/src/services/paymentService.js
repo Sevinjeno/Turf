@@ -20,7 +20,29 @@
 //       receipt: receiptId,
 //       payment_capture: 1,
 //     };
+// export const createRazorpayOrder = async (amount, receiptId) => {
+//     const options = {
+//       amount: amount * 100, // Razorpay expects amount in paise
+//       currency: 'INR',
+//       receipt: receiptId,
+//       payment_capture: 1,
+//     };
   
 //     const order = await razorpay.orders.create(options);
 //     return order;
 //   };
+
+export const createPaymentIntent = async ({
+  user_id,
+  amount,
+  metadata,
+}) => {
+  // Fake payment intent (Stripe-style)
+  return {
+    payment_intent_id: uuid(),
+    amount,
+    currency: "INR",
+    status: "CREATED",
+    metadata, // booking details stored safely
+  };
+};

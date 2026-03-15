@@ -1,39 +1,80 @@
-import { sendEmailOTP, validateOTP } from '../../services/AuthServices/emailService.js';
+import { saveRefreshToken } from '../../models/userModel.js';
+import { sendOtpToEmail, verifyOtpForEmail } from '../../services/AuthServices/emailService.js';
+import { fetchUserByEmail, registerUser } from '../../services/userService.js';
+import { generateRefreshToken, generateAccessToken } from '../../utils/jwtUtils.js';
+import { deleteOtp, getOtp } from '../../utils/RedisClient.js';
 
-/**
- * Controller to handle sending OTP via email.
- */
-export const sendOTPController = async (req, res) => {
-    const { email } = req.body;
-
-    if (!email) {
-        return res.status(400).json({ message: 'Email is required' });
-    }
-
+export const sendEmailOtpController = async (req, res) => {
+  const { email } = req.body;
     try {
-        const response = await sendEmailOTP(email);
-        res.status(200).json(response);
+        await sendOtpToEmail(email);
+        res.status(200).json({ message: 'OTP sent to email' });
     } catch (error) {
-        res.status(500).json({ message: 'Failed to send OTP', error: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
-/**
- * Controller to verify the OTP.
- */
-export const verifyOTPController = async (req, res) => {
-    const { email, otp } = req.body;
+export const verifyEmailOtpController = async (req, res) => {
+  const { email, otp } = req.body; // always declared before try
+  try {
 
-    if (!email || !otp) {
-        return res.status(400).json({ message: 'Email and OTP are required' });
+    const storedOtp = await getOtp(email);
+
+    if (!storedOtp) {
+      // OTP expired or never issued
+      return res.status(400).json({ message: "OTP expired or not found" });
     }
 
-    try {
-        const isValid = validateOTP(email, otp);
-        if (isValid) {
-            res.status(200).json({ message: 'OTP verified successfully' });
-        }
-    } catch (error) {
-        res.status(400).json({ message: error.message });
+    if (storedOtp.trim() !== otp.trim()) {
+      // Incorrect OTP
+      return res.status(400).json({ message: "Incorrect OTP" });
     }
+
+    // OTP is valid → delete from Redis so it can't be reused
+    await deleteOtp(email);
+
+    //find or create user
+
+    let user= await fetchUserByEmail(email)
+    if(!user){
+      user = await registerUser({
+    name: null,
+    email: email,    // pass it properly
+    phone: null,
+    google_id: null
+  });
+    }
+
+      // ✅ Generate tokens
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+
+    // Save refresh token in DB
+    await saveRefreshToken(user?.id, refreshToken);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      path: "/",
+    });
+
+  //   res.jso("user_token", accessToken, {
+  //   httpOnly: true,
+  //   secure: false,
+  //   sameSite: "lax", // Strict blocks cookies between 5173 → 3000
+  //   path: "/",
+  // });
+  res.clearCookie("user_token", {
+  httpOnly: true,
+  secure: false,
+  sameSite: "lax",
+  path: "/",
+});
+
+    return res.status(200).json({ message: "Email verified successfully",accessToken,user:{id:user.id,email:user.email,phone:user.phone,name:user.name} });
+  } catch (err) {
+    console.error(`Error verifying OTP for ${email}:`, err);
+    return res.status(500).json({ message: "Server error" });
+  }
 };
