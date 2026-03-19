@@ -4,15 +4,13 @@ import { getToken } from "../src/utils/secureStore";
 
 export default function Index() {
   const [loading, setLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
       const token = await getToken("refreshToken");
 
-      if (token) {
-        setIsLoggedIn(true);
-      }
+      if (token) setLoggedIn(true);
 
       setLoading(false);
     };
@@ -22,5 +20,5 @@ export default function Index() {
 
   if (loading) return null;
 
-  return <Redirect href={isLoggedIn ? "/(tabs)" : "/login"} />;
+  return <Redirect href={loggedIn ? "/(tabs)" : "/login"} />;
 }
