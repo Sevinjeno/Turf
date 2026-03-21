@@ -1,91 +1,91 @@
-import axios from "axios";
-import store from "../store";
-import { setAccessToken, logout } from "../store/features/auth/authSlice";
-import { getRefreshToken } from "../services/tokenService";
+// import axios from "axios";
+// import store from "../store";
+// import { setAccessToken, logout } from "../store/features/auth/authSlice";
+// import { getRefreshToken } from "../services/tokenService";
 
-export const API_URL = "http://localhost:3000/api/";
+// export const API_URL = "http://localhost:3000/api/";
 
-export const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+// export const api = axios.create({
+//   baseURL: API_URL,
+//   headers: {
+//     "Content-Type": "application/json",
+//   },
+// });
 
-let isRefreshing = false;
-let failedQueue: any[] = [];
+// let isRefreshing = false;
+// let failedQueue: any[] = [];
 
-const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach((p) => {
-    if (error) p.reject(error);
-    else p.resolve(token);
-  });
+// const processQueue = (error: any, token: string | null = null) => {
+//   failedQueue.forEach((p) => {
+//     if (error) p.reject(error);
+//     else p.resolve(token);
+//   });
 
-  failedQueue = [];
-};
-
-
-// Request Interceptor
+//   failedQueue = [];
+// };
 
 
-api.interceptors.request.use((config) => {
-  const token = store.getState().auth.accessToken;
-
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
-});
+// // Request Interceptor
 
 
-// Response Interceptor
+// api.interceptors.request.use((config) => {
+//   const token = store.getState().auth.accessToken;
+
+//   if (token && config.headers) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+
+//   return config;
+// });
 
 
-api.interceptors.response.use(
-  (res) => res,
-  async (error) => {
-    const originalRequest = error.config;
+// // Response Interceptor
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
 
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        }).then((token) => {
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return api(originalRequest);
-        });
-      }
+// api.interceptors.response.use(
+//   (res) => res,
+//   async (error) => {
+//     const originalRequest = error.config;
 
-      originalRequest._retry = true;
-      isRefreshing = true;
+//     if (error.response?.status === 401 && !originalRequest._retry) {
 
-      try {
-        const refreshToken = await getRefreshToken();
+//       if (isRefreshing) {
+//         return new Promise((resolve, reject) => {
+//           failedQueue.push({ resolve, reject });
+//         }).then((token) => {
+//           originalRequest.headers.Authorization = `Bearer ${token}`;
+//           return api(originalRequest);
+//         });
+//       }
 
-        const res = await axios.post(API_URL + "auth/refresh", {
-          refreshToken,
-        });
+//       originalRequest._retry = true;
+//       isRefreshing = true;
 
-        const newAccessToken = res.data.accessToken;
+//       try {
+//         const refreshToken = await getRefreshToken();
 
-        store.dispatch(setAccessToken(newAccessToken));
+//         const res = await axios.post(API_URL + "auth/refresh", {
+//           refreshToken,
+//         });
 
-        processQueue(null, newAccessToken);
+//         const newAccessToken = res.data.accessToken;
 
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+//         store.dispatch(setAccessToken(newAccessToken));
 
-        return api(originalRequest);
-      } catch (err) {
-        processQueue(err, null);
-        store.dispatch(logout());
-        return Promise.reject(err);
-      } finally {
-        isRefreshing = false;
-      }
-    }
+//         processQueue(null, newAccessToken);
 
-    return Promise.reject(error);
-  }
-);
+//         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+//         return api(originalRequest);
+//       } catch (err) {
+//         processQueue(err, null);
+//         store.dispatch(logout());
+//         return Promise.reject(err);
+//       } finally {
+//         isRefreshing = false;
+//       }
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );

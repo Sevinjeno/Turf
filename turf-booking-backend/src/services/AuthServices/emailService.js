@@ -1,4 +1,4 @@
-import redis, { storeOtp, getOtp, deleteOtp } from '../../utils/redisClient.js';
+import redis, { storeOtp, getOtp, deleteOtp } from '../../utils/RedisClient.js';
 import { generateOtp } from '../../utils/OtpUtils.js';
 import { fetchUserByEmail, registerUser } from '../userService.js';
 import { generateAccessToken } from '../../utils/jwtUtils.js';

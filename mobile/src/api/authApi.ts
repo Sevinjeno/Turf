@@ -1,19 +1,34 @@
-import {api} from "../services/axiosClient";
+import api from "./api";
+import { setToken } from "../utils/secureStore";
 
-export const sendOtpApi = async (mobile: string) => {
-  const res = await api.post("/auth/send-otp", {
-    mobile
-  });
 
-  return res.data;
+const isEmail=(value:string)=>value.includes("@")
+
+export const sendOtpApi = async (value: string) => {
+
+  if(isEmail(value)){
+     return await api.post("/auth/email/send-otp",{email:value});
+  }else{
+     return await api.post("/auth/phone/send-otp",{phone:value});
+  }
 };
 
-export const verifyOtpApi = async (mobile: string, otp: string) => {
+export const verifyOtpApi = async (value: string, otp: string) => {
+  let res;
 
-  const res = await api.post("/auth/verify-otp", {
-    mobile,
-    otp
-  });
+  if(isEmail(value)){
+    res=await api.post("/auth/email/verify-otp",{email:value,otp,})
+  }else{
+    res=await api.post("/auth/phone/verify-otp",{
+      phone:value,
+      otp,
+    })
+  }
+  const { accessToken, refreshToken, user } = res.data;
 
-  return res.data;
+  // 🔥 store tokens securely
+  await setToken("accessToken", accessToken);
+  await setToken("refreshToken", refreshToken);
+
+  return user;
 };
