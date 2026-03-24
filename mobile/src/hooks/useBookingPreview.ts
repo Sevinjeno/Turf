@@ -3,12 +3,21 @@ import dayjs from "dayjs";
 import { BookingPreviewResponse } from "../types/bookings";
 import { previewBooking } from "../services/bookingService";
 
+import {SelectedSlot} from "../types/slots";
+
+interface UseBookingPreviewProps {
+  selectedSlot: SelectedSlot;
+  selectedDate: string;
+  selectedCourt: string | null;
+  turfId: string;
+}
+
 export const useBookingPreview = ({
   selectedSlot,
   selectedDate,
   selectedCourt,
   turfId,
-}) => {
+}:UseBookingPreviewProps) => {
   const [pricePreview, setPricePreview] =
     useState<BookingPreviewResponse | null>(null);
   const [priceLoading, setPriceLoading] = useState(false);
@@ -46,7 +55,7 @@ export const useBookingPreview = ({
     };
 
     run();
-  }, [selectedSlot, selectedDate, selectedCourt]);
+  }, [selectedSlot, selectedDate, selectedCourt,turfId]);
 
   return { pricePreview, priceLoading, priceError };
 };

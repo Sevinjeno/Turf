@@ -1,44 +1,78 @@
-import { View, FlatList, Text } from "react-native";
-import SlotItem from "./SlotItem";
+import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { Slot } from "../../types/slots"; // 👈 same place as TimeSlotGrid
 
-export default function TimeSlotGrid({
-  slots,
-  selectedSlot,
-  handleSelect,
-}) {
-  const isSelected = (slot) => {
-    if (!selectedSlot.start) return false;
+// 🔹 Props type
+type SlotItemProps = {
+  item: Slot;
+  isBooked: boolean;
+  isSelected: boolean;
+  onPress: () => void;
+};
 
-    if (!selectedSlot.end) {
-      return selectedSlot.start.time === slot.time;
-    }
-
-    return (
-      slot.time >= selectedSlot.start.time &&
-      slot.time <= selectedSlot.end.time
-    );
-  };
-
+export default function SlotItem({
+  item,
+  isBooked,
+  isSelected,
+  onPress,
+}: SlotItemProps) {
   return (
-    <View style={{ padding: 16 }}>
-      <Text style={{ fontWeight: "bold", marginBottom: 10 }}>
-        Select Time Slot
+    <TouchableOpacity
+      style={[
+        styles.container,
+        isBooked && styles.booked,
+        isSelected && styles.selected,
+      ]}
+      onPress={onPress}
+      disabled={isBooked} // 🚫 prevent clicking booked slots
+      activeOpacity={0.7}
+    >
+      <Text
+        style={[
+          styles.text,
+          isBooked && styles.bookedText,
+          isSelected && styles.selectedText,
+        ]}
+      >
+        {item.time}
       </Text>
-
-      <FlatList
-        data={slots}
-        numColumns={3}
-        scrollEnabled={false}
-        keyExtractor={(item) => item.time}
-        renderItem={({ item }) => (
-          <SlotItem
-            item={item}
-            isBooked={item.status === "booked"}
-            isSelected={isSelected(item)}
-            onPress={() => handleSelect(item)}
-          />
-        )}
-      />
-    </View>
+    </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    margin: 5,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  selected: {
+    backgroundColor: "#007bff",
+    borderColor: "#007bff",
+  },
+
+  booked: {
+    backgroundColor: "#eee",
+    borderColor: "#ddd",
+  },
+
+  text: {
+    fontSize: 14,
+    color: "#333",
+  },
+
+  selectedText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+
+  bookedText: {
+    color: "#999",
+    textDecorationLine: "line-through",
+  },
+});

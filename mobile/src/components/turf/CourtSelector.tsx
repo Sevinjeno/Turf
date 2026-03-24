@@ -1,10 +1,22 @@
 import { View, Text, TouchableOpacity } from "react-native";
 
+type Court = {
+  id: string;
+  name: string;
+};
+
+type CourtSelectorProps = {
+  courts: Court[];
+  selectedCourt: string|null;
+  setSelectedCourt: (id: string) => void;
+};
+
+
 export default function CourtSelector({
   courts,
   selectedCourt,
   setSelectedCourt,
-}) {
+}:CourtSelectorProps) {
   return (
     <View style={{ padding: 16 }}>
       <Text style={{ fontWeight: "bold", marginBottom: 10 }}>
@@ -12,7 +24,7 @@ export default function CourtSelector({
       </Text>
 
       <View style={{ flexDirection: "row" }}>
-        {courts.map((court) => (
+        {courts.map((court:Court) => (
           <TouchableOpacity
             key={court.id}
             onPress={() => setSelectedCourt(court.id)}
