@@ -1,5 +1,5 @@
-import { useState } from "react";
+// import { useState } from "react";
 
-export function useLocation(){
-    const [location,setLocation]=useState<{lat:number;lon:number}|null>(null);
-}
+// export function useLocation(){
+//     const [location,setLocation]=useState<{lat:number;lon:number}|null>(null);
+// }
