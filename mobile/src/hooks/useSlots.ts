@@ -1,19 +1,28 @@
 import { useEffect, useState } from "react";
-import { fetchTurfSlots } from "../services/slots";
+import { fetchSlots } from "../services/slotService";
 
-export const useSlots = (turfId: string, date: string) => {
+export const useSlots = (turfId: number, date: string) => {
   const [slots, setSlots] = useState([]);
   const [minDuration, setMinDuration] = useState(60);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetch = async () => {
-      const res = await fetchTurfSlots(turfId, date);
-      setSlots(res.slots);
-      setMinDuration(res.minBookingDuration);
-    };
-
-    if (turfId) fetch();
+    loadSlots();
   }, [turfId, date]);
 
-  return { slots, minDuration };
+  const loadSlots = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchSlots(turfId, date);
+
+      setSlots(data.slots);
+      setMinDuration(data.minBookingDuration);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { slots, minDuration, loading };
 };

@@ -1,9 +1,9 @@
 import api from "../api/api";
 
-export const fetchTurfSlots = async (
-  turfId: string,
-  date: string
-) => {
-  const res = await api.get(`/slots/${turfId}?date=${date}`);
+export const fetchSlots = async (turfId: number, date: string) => {
+  const res = await api.get(
+    `/slots/${turfId}/${date}`
+  );
+
   return res.data;
 };

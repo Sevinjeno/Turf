@@ -1,78 +1,36 @@
-import { TouchableOpacity, Text, StyleSheet } from "react-native";
-import { Slot } from "../../types/slots"; // 👈 same place as TimeSlotGrid
+import { TouchableOpacity, Text } from "react-native";
+import { Slot } from "../../types/bookings";
 
-// 🔹 Props type
-type SlotItemProps = {
+type Props = {
   item: Slot;
-  isBooked: boolean;
   isSelected: boolean;
+  isDisabled: boolean;
   onPress: () => void;
 };
 
 export default function SlotItem({
   item,
-  isBooked,
   isSelected,
+  isDisabled,
   onPress,
-}: SlotItemProps) {
+}: Props) {
   return (
     <TouchableOpacity
-      style={[
-        styles.container,
-        isBooked && styles.booked,
-        isSelected && styles.selected,
-      ]}
       onPress={onPress}
-      disabled={isBooked} // 🚫 prevent clicking booked slots
-      activeOpacity={0.7}
+      disabled={isDisabled}
+      style={{
+        flex: 1,
+        margin: 5,
+        padding: 14,
+        borderRadius: 8,
+        backgroundColor: isDisabled
+          ? "#ccc"
+          : isSelected
+          ? "#4CAF50"
+          : "#fff",
+      }}
     >
-      <Text
-        style={[
-          styles.text,
-          isBooked && styles.bookedText,
-          isSelected && styles.selectedText,
-        ]}
-      >
-        {item.time}
-      </Text>
+      <Text style={{ textAlign: "center" }}>{item.time}</Text>
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    margin: 5,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  selected: {
-    backgroundColor: "#007bff",
-    borderColor: "#007bff",
-  },
-
-  booked: {
-    backgroundColor: "#eee",
-    borderColor: "#ddd",
-  },
-
-  text: {
-    fontSize: 14,
-    color: "#333",
-  },
-
-  selectedText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-
-  bookedText: {
-    color: "#999",
-    textDecorationLine: "line-through",
-  },
-});
