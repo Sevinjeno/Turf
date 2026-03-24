@@ -1,16 +1,7 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, Button } from "react-native";
+import { SelectedSlot } from "../../types/bookings";
 
-type Slot = {
-  time: string;
-  status: "available" | "booked";
-};
-
-type SelectedSlot = {
-  start: Slot | null;
-  end: Slot | null;
-};
-
-type BookingSummaryProps = {
+type Props = {
   selectedSlot: SelectedSlot;
   selectedCourt: string | null;
   onBook: () => void;
@@ -20,37 +11,14 @@ export default function BookingSummary({
   selectedSlot,
   selectedCourt,
   onBook,
-}:BookingSummaryProps) {
-  const disabled =
-    !selectedSlot.start || !selectedSlot.end || !selectedCourt;
-
+}: Props) {
   return (
-    <View style={{ padding: 16 }}>
+    <View>
       <Text>
-        {selectedSlot.start
-          ? `Start: ${selectedSlot.start.time}`
-          : "Select start time"}
+        {selectedSlot.start?.time} - {selectedSlot.end?.time}
       </Text>
-
-      {selectedSlot.end && (
-        <Text>End: {selectedSlot.end.time}</Text>
-      )}
-
-      {selectedCourt && <Text>Court: {selectedCourt}</Text>}
-
-      <TouchableOpacity
-        disabled={disabled}
-        onPress={onBook}
-        style={{
-          marginTop: 16,
-          padding: 14,
-          borderRadius: 10,
-          backgroundColor: disabled ? "#aaa" : "#111",
-          alignItems: "center",
-        }}
-      >
-        <Text style={{ color: "#fff" }}>Book Now</Text>
-      </TouchableOpacity>
+      <Text>Court: {selectedCourt}</Text>
+      <Button title="Book Now" onPress={onBook} />
     </View>
   );
 }

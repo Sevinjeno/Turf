@@ -1,53 +1,36 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { FlatList, TouchableOpacity, Text } from "react-native";
+import { Court } from "../../types/bookings";
 
-type Court = {
-  id: string;
-  name: string;
-};
-
-type CourtSelectorProps = {
+type Props = {
   courts: Court[];
-  selectedCourt: string|null;
+  selectedCourt: string | null;
   setSelectedCourt: (id: string) => void;
 };
-
 
 export default function CourtSelector({
   courts,
   selectedCourt,
   setSelectedCourt,
-}:CourtSelectorProps) {
+}: Props) {
   return (
-    <View style={{ padding: 16 }}>
-      <Text style={{ fontWeight: "bold", marginBottom: 10 }}>
-        Select Court
-      </Text>
-
-      <View style={{ flexDirection: "row" }}>
-        {courts.map((court:Court) => (
-          <TouchableOpacity
-            key={court.id}
-            onPress={() => setSelectedCourt(court.id)}
-            style={{
-              padding: 10,
-              marginRight: 10,
-              borderWidth: 1,
-              borderRadius: 10,
-              backgroundColor:
-                selectedCourt === court.id ? "#111" : "#fff",
-            }}
-          >
-            <Text
-              style={{
-                color:
-                  selectedCourt === court.id ? "#fff" : "#000",
-              }}
-            >
-              {court.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
+    <FlatList
+      horizontal
+      data={courts}
+      keyExtractor={(i) => i.id}
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          onPress={() => setSelectedCourt(item.id)}
+          style={{
+            padding: 10,
+            margin: 6,
+            borderRadius: 10,
+            backgroundColor:
+              selectedCourt === item.id ? "#4CAF50" : "#eee",
+          }}
+        >
+          <Text>{item.name}</Text>
+        </TouchableOpacity>
+      )}
+    />
   );
 }

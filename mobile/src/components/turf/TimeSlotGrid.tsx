@@ -1,154 +1,78 @@
-import React, { useMemo } from "react";
-import { View, FlatList, Text, Alert } from "react-native";
+import { View, FlatList, Alert } from "react-native";
+import dayjs from "dayjs";
+import { Slot, SelectedSlot } from "../../types/bookings";
 import SlotItem from "./SlotItem";
-import { Slot, SelectedSlot } from "../../types/slots";
 
-// 🔹 Props
-type TimeSlotGridProps = {
+type Props = {
   slots: Slot[];
-  selectedSlot: SelectedSlot | null;
-  setSelectedSlot: (slot: SelectedSlot) => void;
-  selectedCourt: string | null;
-   handleSelect: (slot: Slot) => void;
-};
-
-// 🔹 Convert time → minutes
-const toMinutes = (time: string): number => {
-  const [h, m] = time.split(":").map(Number);
-  return h * 60 + m;
+  selectedSlot: SelectedSlot;
+  setSelectedSlot: (s: SelectedSlot) => void;
+  selectedDate: string;
+  minDuration: number;
 };
 
 export default function TimeSlotGrid({
   slots,
   selectedSlot,
   setSelectedSlot,
-  selectedCourt,
-}: TimeSlotGridProps) {
-  // 🔹 Create slot map (time → slot)
-  const slotMap = useMemo(() => {
-    const map = new Map<number, Slot>();
-    slots.forEach((slot) => {
-      map.set(toMinutes(slot.time), slot);
-    });
-    return map;
-  }, [slots]);
-
-  // 🔹 Check consecutive slots (robust)
-  const isConsecutiveAvailable = (
-    startTime: string,
-    endTime: string
-  ): boolean => {
-    const start = toMinutes(startTime);
-    const end = toMinutes(endTime);
-
-    if (end <= start) return false;
-
-    for (let t = start; t <= end; t += 30) {
-      // 👈 adjust if slot duration is different
-      const slot = slotMap.get(t);
-
-      if (!slot || slot.status !== "available") {
-        return false;
-      }
-    }
-
-    return true;
+  selectedDate,
+  minDuration,
+}: Props) {
+  const toMin = (t: string) => {
+    const [h, m] = t.split(":").map(Number);
+    return h * 60 + m;
   };
 
-  // 🔹 Handle selection
-const handleSelect = (slot: Slot) => {
-  const selectedStart = selectedSlot?.start;
-  const selectedEnd = selectedSlot?.end;
+  const isPast = (time: string) =>
+    dayjs(`${selectedDate} ${time}`).isBefore(dayjs());
 
-  // ✅ CASE 1: Nothing selected → set start
-  if (!selectedStart) {
-    setSelectedSlot({
-      start: slot,
-      end: null,
-      courtId: Number(selectedCourt),
-    });
-    return;
-  }
+  const handleSelect = (slot: Slot) => {
+    const start = selectedSlot.start;
 
-  // ✅ CASE 2: Same slot clicked again → UNSELECT
-  if (
-    selectedStart.time === slot.time &&
-    !selectedEnd
-  ) {
-    setSelectedSlot({
-  start: null,
-  end: null,
-  courtId: undefined,
-}); // 👈 FIX (clear selection)
-    return;
-  }
+    if (!start) return setSelectedSlot({ start: slot, end: null });
 
-  const startMin = toMinutes(selectedStart.time);
-  const currentMin = toMinutes(slot.time);
+    const startMin = toMin(start.time);
+    const currentMin = toMin(slot.time);
 
-  // ✅ CASE 3: Clicking earlier slot → reset start
-  if (currentMin < startMin) {
-    setSelectedSlot({
-      start: slot,
-      end: null,
-      courtId: Number(selectedCourt),
-    });
-    return;
-  }
+    if (currentMin < startMin)
+      return setSelectedSlot({ start: slot, end: null });
 
-  // ✅ CASE 4: Same slot but range exists → reset
-  if (selectedStart.time === slot.time && selectedEnd) {
-    setSelectedSlot({
-      start: slot,
-      end: null,
-      courtId: Number(selectedCourt),
-    });
-    return;
-  }
+    const diff = currentMin - startMin;
 
-  // ✅ CASE 5: Select range (forward only)
-  if (!isConsecutiveAvailable(selectedStart.time, slot.time)) {
-    Alert.alert("Invalid Selection", "Only consecutive slots allowed");
-    return;
-  }
+    if (diff < minDuration) {
+      Alert.alert("Min booking not met");
+      return;
+    }
 
-  setSelectedSlot({
-    start: selectedStart,
-    end: slot,
-    courtId: Number(selectedCourt),
-  });
-};
+    setSelectedSlot({ start, end: slot });
+  };
 
-  // 🔹 Check if slot is selected
-  const isSlotInRange = (slot: Slot): boolean => {
-    if (!selectedSlot?.start) return false;
+  const isSelected = (slot: Slot) => {
+    if (!selectedSlot.start) return false;
 
-    const startMin = toMinutes(selectedSlot.start.time);
-    const endMin = selectedSlot.end
-      ? toMinutes(selectedSlot.end.time)
-      : startMin;
+    const start = toMin(selectedSlot.start.time);
+    const end = selectedSlot.end
+      ? toMin(selectedSlot.end.time)
+      : start;
 
-    const current = toMinutes(slot.time);
+    const cur = toMin(slot.time);
 
-    return current >= startMin && current <= endMin;
+    return cur >= start && cur <= end;
   };
 
   return (
-    <View style={{ padding: 16 }}>
-      <Text style={{ fontWeight: "bold", marginBottom: 10 }}>
-        Select Time Slot
-      </Text>
-
+    <View>
       <FlatList
         data={slots}
         numColumns={3}
-        scrollEnabled={false}
-        keyExtractor={(item) => item.time}
+        keyExtractor={(i) => i.time}
         renderItem={({ item }) => (
           <SlotItem
             item={item}
-            isBooked={item.status === "booked"}
-            isSelected={isSlotInRange(item)}
+            isSelected={isSelected(item)}
+            isDisabled={
+              item.status === "booked" || isPast(item.time)
+            }
             onPress={() => handleSelect(item)}
           />
         )}
